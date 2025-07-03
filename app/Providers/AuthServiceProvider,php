@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Models\Fauna;
+use App\Policies\FaunaDocumentoPolicy;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    protected $policies = [
+        Fauna::class => FaunaDocumentoPolicy::class,
+    ];
+
+    public function boot(): void
+    {
+        $this->registerPolicies();
+    }
+}

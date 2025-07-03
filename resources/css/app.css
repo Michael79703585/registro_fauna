@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Personaliza Select2 para que se vea más "Tailwind" */
+.select2-container .select2-selection--single {
+  height: 2.5rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.375rem; /* rounded-md */
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: #374151; /* text-gray-700 */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0.75rem;
+}

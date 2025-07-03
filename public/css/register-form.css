@@ -1,0 +1,141 @@
+/* --- Inputs y selects con sombra glow al foco --- */
+.input-glow {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: 1rem;
+  border: 2px solid #5cc354; /* verde medio */
+  color: #256029; /* texto verde oscuro */
+  background-color: white;
+  font-size: 1rem;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  box-shadow: 0 2px 6px rgba(96, 196, 132, 0.2);
+  outline: none;
+}
+
+.input-glow::placeholder {
+  color: #7cbf75; /* verde tenue */
+}
+
+.input-glow:hover {
+  box-shadow: 0 4px 12px rgba(66, 163, 80, 0.45);
+  border-color: #44b053;
+}
+
+.input-glow:focus {
+  border-color: #1f6e38;
+  box-shadow:
+    0 0 8px 3px rgba(70, 177, 84, 0.7),
+    0 0 12px 6px rgba(146, 239, 157, 0.5);
+}
+
+/* Selects */
+.select-glow {
+  appearance: none;
+  width: 100%;
+  padding: 0.75rem 1.75rem 0.75rem 1.25rem;
+  border-radius: 1rem;
+  border: 2px solid #5cc354;
+  color: #2b7a33;
+  background-color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  box-shadow: 0 2px 6px rgba(96, 196, 132, 0.2);
+  outline: none;
+}
+
+.select-glow:hover {
+  box-shadow: 0 4px 12px rgba(60, 179, 113, 0.45);
+  border-color: #3fb565;
+}
+
+.select-glow:focus {
+  border-color: #247143;
+  box-shadow:
+    0 0 8px 3px rgba(38, 148, 85, 0.6),
+    0 0 12px 6px rgba(126, 225, 153, 0.4);
+}
+
+/* Flecha personalizada en selects */
+.select-arrow {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  color: #3fb565;
+  transition: color 0.3s ease;
+}
+
+.select-glow:focus + .select-arrow,
+.select-glow:hover + .select-arrow {
+  color: #1e4d2b;
+}
+
+/* Errores animados */
+.input-error {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #dc2626; /* rojo */
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Botón con gradiente verde y animación de brillo */
+.btn-glow {
+  background: linear-gradient(90deg, #3fb565, #1a5615);
+  color: white;
+  padding: 0.75rem 2.5rem;
+  font-weight: 700;
+  font-size: 1.125rem;
+  border-radius: 1.5rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(23, 66, 24, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 30px rgba(7, 43, 7, 0.8);
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  transform: rotate(25deg);
+}
+
+.btn-glow:hover::before {
+  opacity: 1;
+  animation: shine 1.5s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(25deg);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
