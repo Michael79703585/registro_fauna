@@ -251,7 +251,6 @@
       <h2 class="text-4xl font-extrabold mb-6">📬 Contacto</h2>
       <p class="text-lg mb-4">¿Tienes dudas o sugerencias? Escríbenos:</p>
       <p class="text-lg"><strong>Email:</strong> fauna@gadc.bo</p>
-      <p class="text-lg"><strong>Teléfono:</strong> +591 4 4456789</p>
     </div>
   </section>
 
