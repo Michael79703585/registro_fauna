@@ -64,12 +64,6 @@ class InstitucionesSeeder extends Seeder
             ],
 
             [
-                'nombre' => 'CENTRO DE ATENCION Y DERIVACION GAM COCHABAMBA',
-                'direccion' => 'Dirección del CAD',
-                'telefono' => '987654321',
-            ],
-
-            [
                 'nombre' => 'BIOPARQUE MACHIA',
                 'direccion' => 'Dirección del Bioparque',
                 'telefono' => '987654321',
