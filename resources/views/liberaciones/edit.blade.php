@@ -21,19 +21,22 @@
         @csrf
         @method('PUT')
 
-        {{-- 1. Código --}}
-        <div>
-            <label for="codigo" class="block font-semibold mb-1">Código</label>
-            <input type="text"
-                   name="codigo"
-                   id="codigo"
-                   value="{{ old('codigo', $liberacion->codigo) }}"
-                   required
-                   class="w-full border px-4 py-2 rounded bg-gray-100"
-                   readonly>
-            {{-- Si no quieres permitir cambiar el código, déjalo readonly. --}}
-        </div>
+        {{-- Fauna asociada --}}
+<div>
+    <label for="fauna_id" class="block font-semibold mb-1">Animal Asociado</label>
+    <select name="fauna_id" id="fauna_id" required class="w-full border px-4 py-2 rounded">
+        <option value="">Seleccionar Animal</option>
+        @foreach($faunas as $fauna)
+            <option value="{{ $fauna->id }}" 
+                {{ old('fauna_id', $liberacion->fauna_id) == $fauna->id ? 'selected' : '' }}>
+                {{ $fauna->codigo }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
+      
+        
         {{-- 2. Fecha --}}
         <div>
             <label for="fecha" class="block font-semibold mb-1">Fecha</label>
@@ -80,13 +83,12 @@
 
         {{-- 6. Coordenadas --}}
         <div>
-            <label for="coordenadas" class="block font-semibold mb-1">Coordenadas</label>
-            <input type="text"
-                   name="coordenadas"
-                   id="coordenadas"
-                   value="{{ old('coordenadas', $liberacion->coordenadas) }}"
-                   class="w-full border px-4 py-2 rounded">
-        </div>
+             <label for="coordenadas" class="block text-sm font-medium text-gray-700">Coordenadas</label>
+<input type="text" id="coordenadas" name="coordenadas" value="{{ old('coordenadas', $registroDuplicado->coordenadas ?? '') }}" class="w-full border-gray-300 rounded-md shadow-sm">
+
+<div id="map" class="mt-4" style="height: 400px;"></div>
+            </div>
+      
 
         {{-- 7. Tipo de Animal --}}
         <div>

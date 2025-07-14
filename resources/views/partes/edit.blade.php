@@ -8,8 +8,17 @@
         <strong>¡Éxito!</strong> El formulario fue actualizado.
     </div>
 
+    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <strong>¡Error!</strong> No se pudo actualizar el registro. Verifique los datos.
+    </div>
+
     <input type="hidden" id="parte_id" value="{{ $parte->id }}">
 
+    {{-- Código --}}
+    <div class="mt-4">
+        <label class="block text-gray-700 font-medium mb-2">Código</label>
+        <input type="text" id="codigo" value="{{ $parte->codigo }}" class="w-full border rounded px-4 py-2" readonly>
+    </div>
 
     {{-- Tipo de Registro --}}
     <div class="mt-4">
@@ -38,8 +47,9 @@
     {{-- Coordenadas --}}
     <div class="mt-4">
         <label class="block text-gray-700 font-medium mb-2">Coordenadas</label>
-        <input type="text" id="coordenadas" value="{{ $parte->coordenadas }}" class="w-full border rounded px-4 py-2">
+        <input type="text" id="coordenadas" value="{{ old('coordenadas', $registroDuplicado->coordenadas ?? '') }}" class="w-full border rounded px-4 py-2">
     </div>
+    <div id="map" class="mt-4" style="height: 400px;"></div>
 
     {{-- Institución Remitente --}}
     <div class="mt-4">
@@ -114,46 +124,49 @@
 </div>
 
 <script>
-    function guardarParte() {
-        const id = document.getElementById('parte_id').value;
+function guardarParte() {
+    const id = document.getElementById('parte_id').value;
+    const url = `{{ route('partes.update', ['parte' => ':id']) }}`.replace(':id', id);
 
-        const data = {
-            _method: 'PATCH',
-            _token: '{{ csrf_token() }}',
-            codigo: document.getElementById('codigo').value,
-            tipo_registro: document.getElementById('tipo_registro').value,
-            fecha_recepcion: document.getElementById('fecha_recepcion').value,
-            ciudad: document.getElementById('ciudad').value,
-            departamento: document.getElementById('departamento').value,
-            coordenadas: document.getElementById('coordenadas').value,
-            institucion_remitente: document.getElementById('institucion_remitente').value,
-            nombre_persona_recibe: document.getElementById('nombre_persona_recibe').value,
-            tipo_elemento: document.getElementById('tipo_elemento').value,
-            motivo_ingreso: document.getElementById('motivo_ingreso').value,
-            cantidad: document.getElementById('cantidad').value,
-            especie: document.getElementById('especie').value,
-            nombre_comun: document.getElementById('nombre_comun').value,
-            tipo_animal: document.getElementById('tipo_animal').value,
-            fecha: document.getElementById('fecha').value,
-            disposicion_final: document.getElementById('disposicion_final').value,
-            observaciones: document.getElementById('observaciones').value
-        };
+    const formData = new FormData();
+    formData.append('_token', '{{ csrf_token() }}');
+    formData.append('_method', 'PATCH');
+    formData.append('codigo', document.getElementById('codigo').value);
+    formData.append('tipo_registro', document.getElementById('tipo_registro').value);
+    formData.append('fecha_recepcion', document.getElementById('fecha_recepcion').value);
+    formData.append('ciudad', document.getElementById('ciudad').value);
+    formData.append('departamento', document.getElementById('departamento').value);
+    formData.append('coordenadas', document.getElementById('coordenadas').value);
+    formData.append('institucion_remitente', document.getElementById('institucion_remitente').value);
+    formData.append('nombre_persona_recibe', document.getElementById('nombre_persona_recibe').value);
+    formData.append('tipo_elemento', document.getElementById('tipo_elemento').value);
+    formData.append('motivo_ingreso', document.getElementById('motivo_ingreso').value);
+    formData.append('cantidad', document.getElementById('cantidad').value);
+    formData.append('especie', document.getElementById('especie').value);
+    formData.append('nombre_comun', document.getElementById('nombre_comun').value);
+    formData.append('tipo_animal', document.getElementById('tipo_animal').value);
+    formData.append('fecha', document.getElementById('fecha').value);
+    formData.append('disposicion_final', document.getElementById('disposicion_final').value);
+    formData.append('observaciones', document.getElementById('observaciones').value);
 
-        fetch(`/partes/${id}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': data._token
-            },
-            body: JSON.stringify(data)
-        }).then(response => {
-            if (response.ok) {
-                document.getElementById('alerta').classList.remove('hidden');
-            } else {
-                alert('Error al guardar los datos');
-            }
-        }).catch(() => alert('Error al guardar'));
-    }
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById('alerta').classList.remove('hidden');
+            document.getElementById('error').classList.add('hidden');
+        } else {
+            document.getElementById('alerta').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+        }
+    })
+    .catch(() => {
+        document.getElementById('alerta').classList.add('hidden');
+        document.getElementById('error').classList.remove('hidden');
+    });
+}
 </script>
+
 @endsection

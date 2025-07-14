@@ -8,35 +8,33 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\PartesExport;  // Importar la clase exportadora
+use App\Exports\PartesExport;
 
 class ParteController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Parte::query();
+    {
+        $query = Parte::query();
 
-    if (Auth::check()) {
-        $user = Auth::user();
-        $userInstitution = $user->institucion->nombre ?? null;
+        if (Auth::check()) {
+            $user = Auth::user();
+            $userInstitution = $user->institucion->nombre ?? null;
 
-        if ($userInstitution) {
-            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
-        } else {
-            // Si no hay institución, quizás mostrar nada o todos (ajustar según lógica)
-            $query->whereRaw('1 = 0'); // no muestra nada
+            if ($userInstitution) {
+                $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
+
+        if ($request->filled('tipo_registro')) {
+            $query->where('tipo_registro', $request->tipo_registro);
+        }
+
+        $partes = $query->latest()->paginate(10);
+
+        return view('partes.index', compact('partes'));
     }
-
-    if ($request->filled('tipo_registro')) {
-        $query->where('tipo_registro', $request->tipo_registro);
-    }
-
-    $partes = $query->latest()->paginate(10);
-
-    return view('partes.index', compact('partes'));
-}
-
 
     public function create()
     {
@@ -91,8 +89,7 @@ class ParteController extends Controller
 
         Parte::create($validated);
 
-        return redirect()->route('partes.index')
-                         ->with('success', 'Parte registrada correctamente.');
+        return redirect()->route('partes.index')->with('success', 'Parte registrada correctamente.');
     }
 
     public function show(Parte $parte)
@@ -139,8 +136,7 @@ class ParteController extends Controller
 
         $parte->update($validated);
 
-        return redirect()->route('partes.index')
-                         ->with('success', 'Registro actualizado correctamente.');
+        return redirect()->route('partes.index')->with('success', 'Registro actualizado correctamente.');
     }
 
     public function destroy(Parte $parte)
@@ -148,17 +144,17 @@ class ParteController extends Controller
         if ($parte->foto) {
             Storage::disk('public')->delete($parte->foto);
         }
+
         $parte->delete();
 
-        return redirect()->route('partes.index')
-                         ->with('success', 'Registro eliminado correctamente.');
+        return redirect()->route('partes.index')->with('success', 'Registro eliminado correctamente.');
     }
 
     private function obtenerIniciales($nombre)
     {
         return collect(explode(' ', strtoupper($nombre)))
             ->filter()
-            ->map(fn($palabra) => substr($palabra, 0, 1))
+            ->map(fn ($palabra) => substr($palabra, 0, 1))
             ->implode('');
     }
 
@@ -166,88 +162,78 @@ class ParteController extends Controller
     {
         $parte = Parte::findOrFail($id);
 
-        $pdf = Pdf::loadView('partes.pdf_individual', compact('parte'))
-                  ->setPaper('letter', 'portrait');
+        $pdf = Pdf::loadView('partes.pdf_individual', compact('parte'))->setPaper('letter', 'portrait');
 
         return $pdf->download('parte_' . $parte->codigo . '.pdf');
     }
 
-    // En tu controlador:
-public function exportExcel(Request $request)
-{
-    $filtros = $request->only(['codigo', 'fecha_inicio', 'fecha_fin']);
+    public function exportExcel(Request $request)
+    {
+        $filtros = $request->only(['codigo', 'fecha_inicio', 'fecha_fin']);
+        $filtros['institucion'] = Auth::user()->institucion->nombre ?? null;
+        $filename = 'partes_' . now()->format('Ymd_His') . '.xlsx';
 
-    $user = Auth::user();
-    $filtros['institucion'] = $user->institucion->nombre ?? null;
-
-    $filename = 'partes_' . now()->format('Ymd_His') . '.xlsx';
-
-    return Excel::download(new PartesExport($filtros), $filename);
-}
+        return Excel::download(new PartesExport($filtros), $filename);
+    }
 
     public function exportPdf(Request $request)
-{
-    $filtros = $request->only(['codigo', 'fecha_inicio', 'fecha_fin']);
+    {
+        $filtros = $request->only(['codigo', 'fecha_inicio', 'fecha_fin']);
+        $institucion = Auth::user()->institucion->nombre ?? null;
 
-    $user = Auth::user();
-    $institucion = $user->institucion->nombre ?? null;
+        $query = Parte::query();
 
-    $query = Parte::query();
+        if ($institucion) {
+            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($institucion)]);
+        }
 
-    if ($institucion) {
-        $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($institucion)]);
+        if (!empty($filtros['codigo'])) {
+            $query->where('codigo', 'like', '%' . $filtros['codigo'] . '%');
+        }
+
+        if (!empty($filtros['fecha_inicio'])) {
+            $query->whereDate('fecha_recepcion', '>=', $filtros['fecha_inicio']);
+        }
+
+        if (!empty($filtros['fecha_fin'])) {
+            $query->whereDate('fecha_recepcion', '<=', $filtros['fecha_fin']);
+        }
+
+        $partes = $query->get();
+
+        $pdf = Pdf::loadView('partes.report', compact('partes'))->setPaper('letter', 'landscape');
+
+        return $pdf->download('partes_' . now()->format('Ymd_His') . '.pdf');
     }
-
-    if (!empty($filtros['codigo'])) {
-        $query->where('codigo', 'like', '%' . $filtros['codigo'] . '%');
-    }
-    if (!empty($filtros['fecha_inicio'])) {
-        $query->whereDate('fecha_recepcion', '>=', $filtros['fecha_inicio']);
-    }
-    if (!empty($filtros['fecha_fin'])) {
-        $query->whereDate('fecha_recepcion', '<=', $filtros['fecha_fin']);
-    }
-
-    $partes = $query->get();
-
-    $pdf = Pdf::loadView('partes.report', compact('partes'))
-        ->setPaper('letter', 'landscape');
-
-    return $pdf->download('partes_' . now()->format('Ymd_His') . '.pdf');
-}
-
 
     public function duplicar($id)
-{
-    $registroOriginal = Parte::findOrFail($id);
+    {
+        $registroOriginal = Parte::findOrFail($id);
+        $registroClonado = $registroOriginal->replicate();
+        $registroClonado->codigo = null;
+        $registroClonado->foto = null;
+        $registroClonado->created_at = null;
+        $registroClonado->updated_at = null;
 
-    $registroClonado = $registroOriginal->replicate();
-    $registroClonado->codigo = null;
-    $registroClonado->foto = null;
-    $registroClonado->created_at = null;
-    $registroClonado->updated_at = null;
+        $user = Auth::user();
+        $institucionNombre = $user->institucion->nombre ?? 'SIN-INST';
+        $iniciales = $this->obtenerIniciales($institucionNombre);
+        $anio = date('Y');
 
-    // Generar un nuevo código si quieres automático:
-    $user = Auth::user();
-    $institucionNombre = $user->institucion->nombre ?? 'SIN-INST';
-    $iniciales = $this->obtenerIniciales($institucionNombre);
-    $anio = date('Y');
+        $ultimoParte = Parte::where('codigo', 'like', "$iniciales-P-%-$anio")
+            ->orderByDesc('id')
+            ->first();
 
-    $ultimoParte = Parte::where('codigo', 'like', "$iniciales-P-%-$anio")
-        ->orderByDesc('id')
-        ->first();
+        $nuevoNumero = $ultimoParte
+            ? str_pad((int)explode('-', $ultimoParte->codigo)[2] + 1, 4, '0', STR_PAD_LEFT)
+            : '0001';
 
-    $nuevoNumero = $ultimoParte
-        ? str_pad((int)explode('-', $ultimoParte->codigo)[2] + 1, 4, '0', STR_PAD_LEFT)
-        : '0001';
+        $codigoGenerado = "$iniciales-P-$nuevoNumero-$anio";
 
-    $codigoGenerado = "$iniciales-P-$nuevoNumero-$anio";
-
-    return view('partes.create', [
-        'registroDuplicado' => $registroClonado,
-        'codigoGenerado' => $codigoGenerado,
-        'institucionNombre' => $institucionNombre,
-    ]);
-}
-
+        return view('partes.create', [
+            'registroDuplicado' => $registroClonado,
+            'codigoGenerado' => $codigoGenerado,
+            'institucionNombre' => $institucionNombre,
+        ]);
+    }
 }

@@ -14,19 +14,27 @@ use App\Models\Institucion;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TransferenciasExport;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class TransferenciaController extends Controller
 {
+    private function getFaunaIdsByUserInstitution()
+{
+    $user = Auth::user();
+
+    $userIds = User::where('institucion_id', $user->institucion_id)->pluck('id');
+
+    $faunasRegistradas = Fauna::whereIn('user_id', $userIds)->pluck('id');
+
+    $faunasTransferidas = Transferencia::where('institucion_destino', $user->institucion_id)
+        ->pluck('fauna_id');
+
+    return $faunasRegistradas->merge($faunasTransferidas)->unique();
+}
+
     public function create()
     {
-        $user = Auth::user();
-
-        $faunasRegistradas = Fauna::where('user_id', $user->id)->pluck('id');
-        $faunasTransferidas = Transferencia::where('institucion_destino', $user->institucion_id)
-            ->pluck('fauna_id');
-
-        $faunaIds = $faunasRegistradas->merge($faunasTransferidas)->unique();
-
+        $faunaIds = $this->getFaunaIdsByUserInstitution();
         $faunas = Fauna::whereIn('id', $faunaIds)->get();
         $instituciones = Institucion::all();
 
@@ -35,13 +43,7 @@ class TransferenciaController extends Controller
 
     public function index(Request $request)
     {
-        $user = Auth::user();
-
-        $faunasRegistradas = Fauna::where('user_id', $user->id)->pluck('id');
-        $faunasTransferidas = Transferencia::where('institucion_destino', $user->institucion_id)
-            ->pluck('fauna_id');
-
-        $faunaIds = $faunasRegistradas->merge($faunasTransferidas)->unique();
+        $faunaIds = $this->getFaunaIdsByUserInstitution();
 
         $query = Transferencia::whereIn('fauna_id', $faunaIds);
 
@@ -299,26 +301,24 @@ class TransferenciaController extends Controller
     }
 
     public function reportePdf()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        $faunaRegistradaIds = Fauna::where('user_id', $user->id)->pluck('id');
-        $faunaTransferidaIds = Transferencia::where('institucion_destino', $user->institucion_id)->pluck('fauna_id');
+    $faunaIds = $this->getFaunaIdsByUserInstitution();
 
-        $faunaIds = $faunaRegistradaIds->merge($faunaTransferidaIds)->unique();
+    $transferencias = Transferencia::with(['fauna', 'institucionOrigen', 'institucionDestino'])
+        ->whereIn('fauna_id', $faunaIds)
+        ->latest()
+        ->get();
 
-        $transferencias = Transferencia::with(['fauna', 'institucionOrigen', 'institucionDestino'])
-            ->whereIn('fauna_id', $faunaIds)
-            ->latest()
-            ->get();
+    $pdf = PDF::loadView('transferencias.reportPdf', compact('transferencias'));
 
-        $pdf = PDF::loadView('transferencias.reportPdf', compact('transferencias'));
+    return $pdf->download('reporte_transferencias.pdf');
+}
 
-        return $pdf->download('reporte_transferencias.pdf');
-    }
+public function reporteExcel()
+{
+    return Excel::download(new TransferenciasExport(Auth::user()), 'reporte_transferencias.xlsx');
+}
 
-    public function reporteExcel()
-    {
-        return Excel::download(new TransferenciasExport(Auth::user()), 'reporte_transferencias.xlsx');
-    }
 }

@@ -22,9 +22,16 @@ class HistorialClinicoExport implements FromCollection, WithHeadings
 
     public function collection(): Collection
     {
-        // Obtener IDs de fauna registrada o transferida al usuario
-        $faunaRegistrada = Fauna::where('user_id', $this->user->id)->pluck('id');
-        $faunaTransferida = Transferencia::where('institucion_destino', $this->user->institucion_id)->pluck('fauna_id');
+        // Obtener fauna perteneciente a la institucion del usuario (todos los usuarios de esa institucion)
+        $faunaRegistrada = Fauna::whereHas('user', function ($query) {
+            $query->where('institucion_id', $this->user->institucion_id);
+        })->pluck('id');
+
+        // Obtener fauna transferida a la institucion del usuario
+        $faunaTransferida = Transferencia::where('institucion_destino', $this->user->institucion_id)
+                                         ->pluck('fauna_id');
+
+        // Unificar IDs de fauna autorizada (registrada o transferida)
         $faunaAutorizadaIds = $faunaRegistrada->merge($faunaTransferida)->unique();
 
         $query = HistorialClinico::with('fauna')

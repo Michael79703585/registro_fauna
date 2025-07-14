@@ -63,6 +63,7 @@ class InstitucionesSeeder extends Seeder
                 'telefono' => '987654321',
             ],
 
+
             [
                 'nombre' => 'BIOPARQUE MACHIA',
                 'direccion' => 'Dirección del Bioparque',

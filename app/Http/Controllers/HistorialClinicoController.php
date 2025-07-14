@@ -15,53 +15,44 @@ use Illuminate\Support\Facades\Log;
 
 class HistorialClinicoController extends Controller
 {
-   public function create(Request $request)
-{
-    $user = Auth::user();
-    $faunaIdSeleccionado = $request->get('fauna_id');
+    public function create(Request $request)
+    {
+        $user = Auth::user();
+        $faunaIdSeleccionado = $request->get('fauna_id');
 
-    // Faunas propias del usuario o de su institución
-    $faunaPropiaIds = Fauna::where(function ($query) use ($user) {
-            $query->where('user_id', $user->id)
-                  ->orWhere('institucion_id', $user->institucion_id);
+        $faunaPropiaIds = Fauna::whereHas('user', function ($query) use ($user) {
+            $query->where('institucion_id', $user->institucion_id);
         })->pluck('id');
 
-    // Faunas transferidas a su institución
-    $faunaTransferidaIds = Transferencia::where('institucion_destino', $user->institucion_id)
-                                        ->pluck('fauna_id');
+        $faunaTransferidaIds = Transferencia::where('institucion_destino', $user->institucion_id)
+                                            ->pluck('fauna_id');
 
-    // Unir ambos conjuntos de fauna
-    $faunaIds = $faunaPropiaIds->merge($faunaTransferidaIds)->unique();
+        $faunaIds = $faunaPropiaIds->merge($faunaTransferidaIds)->unique();
 
-    // Cargar faunas disponibles
-    $faunas = Fauna::whereIn('id', $faunaIds)
-                   ->select('id','codigo','nombre_comun')
-                   ->orderBy('codigo')
-                   ->get();
+        $faunas = Fauna::whereIn('id', $faunaIds)
+                       ->select('id','codigo','nombre_comun')
+                       ->orderBy('codigo')
+                       ->get();
 
-    return view('historial.create', compact('faunas','faunaIdSeleccionado'));
-}
-
+        return view('historial.create', compact('faunas','faunaIdSeleccionado'));
+    }
 
     public function index(Request $request)
     {
         $user = Auth::user();
-        if (!$user) abort(403, 'Acceso denegado');
+        abort_if(!$user, 403, 'Acceso denegado');
 
-        $faunaRegistrada = Fauna::where('user_id',$user->id)->pluck('id');
-        $faunaTransferida = Transferencia::where('institucion_destino',$user->institucion_id)
-                                         ->pluck('fauna_id');
-        $faunaAutorizada = $faunaRegistrada->merge($faunaTransferida)->unique();
+        $faunaAutorizada = $this->obtenerFaunaAutorizada($user);
 
         $query = HistorialClinico::whereIn('fauna_id', $faunaAutorizada)
-    ->with('fauna.ultimaTransferencia') // <--- aquí
-    ->when($request->filled('buscar'), fn($q) =>
-        $q->whereHas('fauna', fn($sub) =>
-            $sub->where('codigo','like','%'.$request->buscar.'%')
-                ->orWhere('nombre_comun','like','%'.$request->buscar.'%')
-        )
-    )
-    ->orderByDesc('fecha');
+            ->with('fauna.ultimaTransferencia')
+            ->when($request->filled('buscar'), fn($q) =>
+                $q->whereHas('fauna', fn($sub) =>
+                    $sub->where('codigo','like','%'.$request->buscar.'%')
+                        ->orWhere('nombre_comun','like','%'.$request->buscar.'%')
+                )
+            )
+            ->orderByDesc('fecha');
 
         $historiales = $query->paginate(10);
 
@@ -99,17 +90,22 @@ class HistorialClinicoController extends Controller
     }
 
     public function show($id)
-    {
-        $historial = HistorialClinico::with('fauna')->findOrFail($id);
-        return view('historial.show', compact('historial'));
-    }
+{
+    $historial = HistorialClinico::with('fauna')->findOrFail($id);
+    $this->authorizeView($historial);  // <-- Aquí
+    return view('historial.show', compact('historial'));
+}
+
 
     public function edit($id)
     {
         $historial = HistorialClinico::with('fauna')->findOrFail($id);
         $this->authorizeInstitution($historial);
 
-        $faunas = Fauna::all();
+        $faunas = Fauna::whereHas('user', function($query) use ($historial) {
+            $query->where('institucion_id', $historial->fauna->user->institucion_id);
+        })->get();
+
         return view('historial.edit', compact('historial','faunas'));
     }
 
@@ -163,13 +159,13 @@ class HistorialClinicoController extends Controller
         return redirect()->route('historial.index')->with('success','Historial eliminado.');
     }
 
-
-    public function exportarPDF($id)
-    {
-        $historial = HistorialClinico::with('fauna')->findOrFail($id);
-        $pdf = Pdf::loadView('historial.pdf', compact('historial'));
-        return $pdf->download("historial_clinico_{$historial->id}.pdf");
-    }
+ public function exportarPDF($id)
+{
+    $historial = HistorialClinico::with('fauna')->findOrFail($id);
+    $this->authorizeView($historial);  // <-- Aquí
+    $pdf = Pdf::loadView('historial.pdf', compact('historial'));
+    return $pdf->download("historial_clinico_{$historial->id}.pdf");
+}
 
     public function reportePdf(Request $request)
     {
@@ -179,12 +175,7 @@ class HistorialClinicoController extends Controller
 
         $historiales = HistorialClinico::with('fauna')
             ->whereIn('fauna_id', $faunaIds)
-            ->when($buscar, function ($query) use ($buscar) {
-                $query->whereHas('fauna', function ($q) use ($buscar) {
-                    $q->where('codigo', 'like', "%$buscar%")
-                      ->orWhere('nombre_comun', 'like', "%$buscar%");
-                });
-            })
+            ->when($buscar, fn($query) => $query->whereHas('fauna', fn($q) => $q->where('codigo','like',"%$buscar%")->orWhere('nombre_comun','like',"%$buscar%")))
             ->orderByDesc('fecha')
             ->get();
 
@@ -211,6 +202,7 @@ class HistorialClinicoController extends Controller
     public function duplicate($id)
     {
         $original = HistorialClinico::findOrFail($id);
+        $this->authorizeInstitution($original);
         $nuevo = $original->replicate();
         $nuevo->fecha = now();
         $nuevo->diagnostico .= ' (copia)';
@@ -222,11 +214,10 @@ class HistorialClinicoController extends Controller
     public function descargarArchivo($id)
     {
         $historial = HistorialClinico::findOrFail($id);
+        $this->authorizeInstitution($historial);
         $ruta = $historial->archivo_laboratorio;
 
-        if (!$ruta || !Storage::disk('public')->exists(str_replace('storage/', '', $ruta))) {
-            abort(404, 'Archivo no encontrado.');
-        }
+        abort_if(!$ruta || !Storage::disk('public')->exists(str_replace('storage/', '', $ruta)), 404, 'Archivo no encontrado.');
 
         return response()->file(storage_path('app/public/' . str_replace('storage/', '', $ruta)));
     }
@@ -234,13 +225,15 @@ class HistorialClinicoController extends Controller
     public function destroyFauna($id)
     {
         $fauna = Fauna::findOrFail($id);
+        $this->authorizeInstitutionForFauna($fauna);
         $fauna->delete();
         return redirect()->route('fauna.index')->with('success', 'Animal eliminado correctamente.');
     }
+ 
 
-    // MÉTODOS PRIVADOS
+   // MÉTODOS PRIVADOS
 
-    private function handleImageUpload(Request $request): ?string
+private function handleImageUpload(Request $request): ?string
     {
         if ($request->hasFile('foto_animal')) {
             $path = $request->file('foto_animal')->store('fotos_animales', 'public');
@@ -282,38 +275,101 @@ class HistorialClinicoController extends Controller
         }
     }
 
-    private function obtenerFaunaAutorizada($user)
+    private function authorizeInstitution(HistorialClinico $historial)
     {
-        $faunaRegistrada = Fauna::where('user_id', $user->id)->pluck('id');
-        $faunaTransferida = Transferencia::where('institucion_destino', $user->institucion_id)->pluck('fauna_id');
-        return $faunaRegistrada->merge($faunaTransferida)->unique();
+        $user = Auth::user();
+        $fauna = $historial->fauna;
+
+        if (!$fauna) abort(403, 'No se encontró el animal relacionado.');
+
+        $transferenciaActual = Transferencia::where('fauna_id', $fauna->id)
+            ->orderByDesc('fecha_transferencia')
+            ->first();
+
+        if ($transferenciaActual) {
+            if ($transferenciaActual->institucion_destino != $user->institucion_id) {
+                abort(403, 'No tienes permiso para modificar o eliminar este historial.');
+            }
+        } else {
+            if ($fauna->user->institucion_id != $user->institucion_id) {
+                abort(403, 'No tienes permiso para modificar o eliminar este historial.');
+            }
+        }
     }
-     private function authorizeInstitution(HistorialClinico $historial)
+
+    private function authorizeView(HistorialClinico $historial): void
+    {
+        $user = Auth::user();
+        $fauna = $historial->fauna;
+
+        if (!$fauna) {
+            abort(403, 'No se encontró el animal relacionado.');
+        }
+
+        $institucionUser = $user->institucion_id;
+
+        $institucionOrigen = $fauna->user->institucion_id;
+
+        $institucionesDestino = Transferencia::where('fauna_id', $fauna->id)
+            ->pluck('institucion_destino')
+            ->toArray();
+
+        $institucionesOrigenTransferencia = Transferencia::where('fauna_id', $fauna->id)
+            ->pluck('institucion_origen')
+            ->toArray();
+
+        $institucionesAutorizadas = array_unique(array_merge(
+            [$institucionOrigen],
+            $institucionesDestino,
+            $institucionesOrigenTransferencia
+        ));
+
+        if (!in_array($institucionUser, $institucionesAutorizadas)) {
+            abort(403, 'No tienes permiso para visualizar o descargar este historial.');
+        }
+    }
+
+    private function obtenerFaunaAutorizada($user)
 {
-    $user = Auth::user();
-    $fauna = $historial->fauna;
+    $faunaIds = Fauna::query()
+        ->whereHas('user', function ($query) use ($user) {
+            $query->where('institucion_id', $user->institucion_id);
+        })
+        ->pluck('id')
+        ->toArray();
 
-    if (!$fauna) {
-        abort(403, 'No se encontró el animal relacionado.');
-    }
+    $faunaTransferida = Transferencia::where('institucion_destino', $user->institucion_id)
+        ->pluck('fauna_id')
+        ->toArray();
 
-    // Obtener la transferencia más reciente (actual dueño institucional)
-    $transferenciaActual = Transferencia::where('fauna_id', $fauna->id)
-        ->orderByDesc('fecha_transferencia')
-        ->first();
+    $faunaHistorial = Transferencia::whereIn('institucion_destino', [$user->institucion_id])
+        ->pluck('fauna_id')
+        ->toArray();
 
-    if ($transferenciaActual) {
-        // Verificar si el usuario pertenece a la institución destino actual
-        if ($user->institucion_id != $transferenciaActual->institucion_destino) {
-            abort(403, 'No tienes permiso para acceder a este historial (no eres institución actual).');
-        }
-    } else {
-        // Si no hay transferencias, verificar si el usuario es el propietario original
-        if ($fauna->user_id != $user->id) {
-            abort(403, 'No tienes permiso para acceder a este historial (no eres el usuario propietario).');
-        }
-    }
+    return collect(array_unique(array_merge($faunaIds, $faunaTransferida, $faunaHistorial)));
 }
 
 
+    private function authorizeInstitutionForFauna(Fauna $fauna)
+    {
+        $user = Auth::user();
+
+        if (!$fauna) {
+            abort(403, 'No se encontró el animal.');
+        }
+
+        if ($fauna->user && $fauna->user->institucion_id == $user->institucion_id) {
+            return;
+        }
+
+        $transferenciaActual = Transferencia::where('fauna_id', $fauna->id)
+            ->orderByDesc('fecha_transferencia')
+            ->first();
+
+        if ($transferenciaActual && $transferenciaActual->institucion_destino == $user->institucion_id) {
+            return;
+        }
+
+        abort(403, 'No tienes permiso para acceder a este animal.');
+    }
 }

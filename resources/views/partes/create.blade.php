@@ -64,11 +64,11 @@
             </div>
 
             <div>
-                <label for="coordenadas" class="block mb-2 font-medium text-gray-700">Coordenadas</label>
-                <input type="text" id="coordenadas" name="coordenadas" maxlength="100"
-                       value="{{ old('coordenadas', $registroDuplicado->coordenadas ?? '') }}"
-                       placeholder="Ej: 4.7110° N, 74.0721° W"
-                       class="w-full border border-gray-300 rounded px-3 py-2 shadow-sm">
+                    <!-- Coordenadas -->
+    <label for="coordenadas" class="block text-sm font-medium text-gray-700">Coordenadas</label>
+<input type="text" id="coordenadas" name="coordenadas" value="{{ old('coordenadas', $registroDuplicado->coordenadas ?? '') }}" class="w-full border-gray-300 rounded-md shadow-sm">
+
+<div id="map" class="mt-4" style="height: 400px;"></div>
             </div>
         </div>
 

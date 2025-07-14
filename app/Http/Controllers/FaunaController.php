@@ -225,22 +225,15 @@ class FaunaController extends Controller
 
 public function reportePdf(Request $request)
 {
-    $userId = Auth::id();
+    $institucionId = Auth::user()->institucion_id;
 
-    $query = Fauna::where('user_id', $userId);
+    // Obtener IDs de usuarios de la misma institución
+    $usuariosInstitucionIds = \App\Models\User::where('institucion_id', $institucionId)->pluck('id');
 
-    // Si usas soft deletes, así te aseguras que no aparezcan registros eliminados:
-    // $query->whereNull('deleted_at'); // Esto es solo si no usas SoftDeletes trait
+    // Filtrar fauna para todos esos usuarios
+    $query = Fauna::whereIn('user_id', $usuariosInstitucionIds);
 
-    // Aplica filtro de institución, si lo quieres igual que index
-    if (Auth::check()) {
-        $userInstitution = Auth::user()->institucion->nombre ?? null;
-        if ($userInstitution) {
-            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
-        }
-    }
-
-    // Aplica los filtros de fecha y código sólo si vienen en la request
+    // Aplicar filtros comunes
     $query = $this->aplicarFiltros($request, $query);
 
     $faunas = $query->get();
@@ -253,24 +246,21 @@ public function reportePdf(Request $request)
 
 public function reporteExcel(Request $request)
 {
-    $userId = Auth::id();
+    $institucionId = Auth::user()->institucion_id;
 
-    $query = Fauna::where('user_id', $userId);
+    // Obtener IDs de usuarios de la misma institución
+    $usuariosInstitucionIds = \App\Models\User::where('institucion_id', $institucionId)->pluck('id');
 
-    if (Auth::check()) {
-        $userInstitution = Auth::user()->institucion->nombre ?? null;
-        if ($userInstitution) {
-            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
-        }
-    }
+    // Filtrar fauna para todos esos usuarios
+    $query = Fauna::whereIn('user_id', $usuariosInstitucionIds);
 
+    // Aplicar filtros comunes
     $query = $this->aplicarFiltros($request, $query);
 
     $faunas = $query->get();
 
     return Excel::download(new \App\Exports\FaunasExport($faunas), 'reporte_fauna_filtrado.xlsx');
 }
-
 
 public function destroy($id)
 {

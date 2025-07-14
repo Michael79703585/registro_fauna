@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Transferencia;
 use App\Models\Fauna;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -19,8 +20,11 @@ class TransferenciasExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        // Obtener fauna registrada por el usuario
-        $faunaRegistradaIds = Fauna::where('user_id', $this->user->id)->pluck('id');
+        // Obtener todos los usuarios de la misma institución
+        $userIds = User::where('institucion_id', $this->user->institucion_id)->pluck('id');
+
+        // Obtener fauna registrada por usuarios de la institución
+        $faunaRegistradaIds = Fauna::whereIn('user_id', $userIds)->pluck('id');
 
         // Obtener fauna transferida a su institución
         $faunaTransferidaIds = Transferencia::where('institucion_destino', $this->user->institucion_id)->pluck('fauna_id');

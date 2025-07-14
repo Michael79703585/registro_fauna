@@ -25,8 +25,10 @@
     <input type="text" id="departamento" name="departamento" value="{{ old('departamento', $fauna->departamento) }}" class="w-full border-gray-300 rounded-md shadow-sm">
 
     <!-- Coordenadas -->
-    <label for="coordenadas">Coordenadas</label>
-    <input type="text" id="coordenadas" name="coordenadas" value="{{ old('coordenadas', $fauna->coordenadas) }}" class="w-full border-gray-300 rounded-md shadow-sm">
+     <label for="coordenadas" class="block text-sm font-medium text-gray-700">Coordenadas</label>
+<input type="text" id="coordenadas" name="coordenadas" value="{{ old('coordenadas', $registroDuplicado->coordenadas ?? '') }}" class="w-full border-gray-300 rounded-md shadow-sm">
+
+<div id="map" class="mt-4" style="height: 400px;"></div>
 
     <!-- Tipo de Elemento -->
     <label for="tipo_elemento">Tipo de Elemento</label>
