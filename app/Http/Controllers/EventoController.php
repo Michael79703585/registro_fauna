@@ -325,7 +325,7 @@ class EventoController extends Controller
             abort(403);
         }
 
-        $pdf = Pdf::loadView('eventos.detalle_pdf', compact('evento'));
+        $pdf = Pdf::loadView('eventos.reporte_evento_pdf', compact('evento'));
 
         $nombreArchivo = 'evento_' . Str::slug($evento->codigo) . '.pdf';
         return $pdf->download($nombreArchivo);
@@ -370,6 +370,24 @@ class EventoController extends Controller
 
     return $siglas . '-NAC-' . str_pad($nuevoNumero, 4, '0', STR_PAD_LEFT);
 }
+
+public function exportarExcel(Request $request)
+{
+    $tipo = $request->get('tipo');
+
+    $eventos = Evento::with('tipoEvento', 'fauna', 'institucion')
+        ->where('institucion_id', Auth::user()->institucion_id)
+        ->when($tipo, function($query) use ($tipo) {
+            $query->whereHas('tipoEvento', function($q) use ($tipo){
+                $q->where('nombre', $tipo);
+            });
+        })
+        ->orderBy('fecha', 'desc')
+        ->get();
+
+    return Excel::download(new EventosExport($eventos), 'eventos.xlsx');
+}
+
 
 
 }
