@@ -235,7 +235,7 @@ class EventoController extends Controller
 }
 
 
-    public function edit($id)
+      public function edit($id)
     {
         $evento = Evento::findOrFail($id);
 
@@ -247,8 +247,9 @@ class EventoController extends Controller
         $tiposEvento = TipoEvento::all();
         $tipo = ucfirst(strtolower($evento->tipoEvento->nombre));
 
-        return view("eventos.edit_{$tipo}", compact('evento', 'faunas', 'tiposEvento', 'tipo'));
+        return view('eventos.edit_' . strtolower($tipo), compact('evento', 'faunas', 'tiposEvento', 'tipo'));
     }
+
 
     public function update(Request $request, $id)
     {
