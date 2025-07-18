@@ -9,7 +9,6 @@ use App\Models\Fauna;
 use App\Models\Institucion;
 
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ParteController;
 use App\Http\Controllers\FaunaController;
 use App\Http\Controllers\UserController;
@@ -71,7 +70,7 @@ Route::get('/', function () {
 Route::redirect('/', '/home');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::resource('publication', PublicationController::class);
-Route::resource('videos', VideoController::class);
+
 
 Route::get('/fauna/plantilla-descarga', function () {
     $filePath = storage_path('app/public/plantilla-fauna.pdf');

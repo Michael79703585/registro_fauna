@@ -14,28 +14,28 @@ class Evento extends Model
     ];
 
     protected $fillable = [
-        'tipo_evento_id',
-        'fauna_id',
-        'institucion_id',
-        'fecha',
-        'observaciones',
-        'foto',
-        'codigo',  // ¿Para qué se usa este campo? Podría generar confusión con codigo_animal
+    'tipo_evento_id',
+    'fauna_id',
+    'institucion_id',
+    'fecha',
+    'observaciones',
+    'foto',
+    'codigo',  // Código del evento (nacimiento, fuga, deceso, etc.)
+    'especie',
+    'nombre_comun',
+    'sexo',
+    'senas_particulares',
+    'codigo_padres',
+    'tipo_animal',
+    'codigo_animal',  // Relación con fauna->codigo
+    'edad',
+    'descripcion_fuga',
+    'causas_deceso',
+    'tratamientos_realizados',
+    'estado_general',  // << Este te faltaba
+    'user_id',
+];
 
-        // Campos específicos por tipo de evento
-        'especie',
-        'nombre_comun',
-        'sexo',
-        'senas_particulares',
-        'codigo_padres',
-        'tipo_animal',
-        'codigo_animal',  // Este es el que relaciona con fauna->codigo
-        'edad',
-        'descripcion_fuga',
-        'causas_deceso',
-        'tratamientos_realizados',
-        'user_id',
-    ];
 
     public function tipoEvento()
     {

@@ -19,35 +19,71 @@ class EventoController extends Controller
     }
 
     
-    public function create($tipo = null)
+   public function create($tipo = null)
 {
-   $faunas = Fauna::where('user_id', Auth::id()) // faunas propias
-    ->orWhereIn('id', function ($query) {
-        $query->select('fauna_id')
-              ->from('transferencias')
-              ->where('estado', 'aceptado');
-    })
-    ->get();
+    $usuario = Auth::user();
+
+    $faunas = Fauna::where(function($query) use ($usuario) {
+        $query->where('user_id', $usuario->id)
+            ->orWhereIn('id', function ($subquery) {
+                $subquery->select('fauna_id')
+                    ->from('transferencias')
+                    ->where('estado', 'aceptado');
+            })
+            ->orWhereIn('user_id', function($subquery) use ($usuario) {
+                $subquery->select('id')
+                    ->from('users')
+                    ->where('institucion_id', $usuario->institucion_id);
+            });
+    })->get();
+
     $tiposEvento = TipoEvento::all();
     $instituciones = Institucion::all();
 
-    $faunasJson = $faunas->map(function ($fauna) {
-    return [
-        'id' => $fauna->id,           // <- agrega esta línea
-        'codigo' => $fauna->codigo,
-        'edad' => $fauna->edad,
-        'especie' => $fauna->especie,
-        'nombre_comun' => $fauna->nombre_comun,
-        'sexo' => $fauna->sexo,
-    ];
-})->values();
+    $faunasExtendidas = $faunas->map(function ($fauna) {
+        return [
+            'codigo' => $fauna->codigo,
+            'especie' => $fauna->especie,
+            'nombre_comun' => $fauna->nombre_comun,
+            'sexo' => $fauna->sexo,
+            'origen' => 'fauna',
+        ];
+    });
+
+    $eventosNacimiento = Evento::whereHas('tipoEvento', function ($q) {
+            $q->where('nombre', 'Nacimiento');
+        })
+        ->where(function($query) use ($usuario) {
+            $query->where('user_id', $usuario->id)
+                ->orWhereIn('fauna_id', function ($q) {
+                    $q->select('fauna_id')
+                        ->from('transferencias')
+                        ->where('estado', 'aceptado');
+                })
+                ->orWhereIn('user_id', function($q) use ($usuario){
+                    $q->select('id')
+                        ->from('users')
+                        ->where('institucion_id', $usuario->institucion_id);
+                });
+        })
+        ->get(['codigo', 'especie', 'nombre_comun', 'sexo']);
+
+    $eventosExtendidos = $eventosNacimiento->map(function ($evento) {
+        return [
+            'codigo' => $evento->codigo,
+            'especie' => $evento->especie,
+            'nombre_comun' => $evento->nombre_comun ?? null,
+            'sexo' => $evento->sexo ?? null,
+            'origen' => 'evento',
+        ];
+    });
+
+    $animalesDisponibles = $faunasExtendidas
+        ->concat($eventosExtendidos)
+        ->unique('codigo')
+        ->values();
 
     $tipo = $tipo ? ucfirst(strtolower($tipo)) : null;
-
-    if ($tipo && !in_array($tipo, ['Nacimiento', 'Fuga', 'Deceso'])) {
-        abort(404, 'Tipo de evento no válido');
-    }
-
     $codigoNuevo = null;
 
     if ($tipo === 'Nacimiento') {
@@ -57,43 +93,19 @@ class EventoController extends Controller
         }
     }
 
-    $eventosNacimiento = Evento::whereHas('tipoEvento', function ($q) {
-        $q->where('nombre', 'Nacimiento');
-    })->get(['codigo', 'especie']);
-
-    $faunasExtendidas = $faunas->map(function ($fauna) {
-    return [
-        'codigo' => $fauna->codigo,
-        'especie' => $fauna->especie,
-        'nombre_comun' => $fauna->nombre_comun,
-        'sexo' => $fauna->sexo,
-        'origen' => 'fauna',
-    ];
-});
-
-    $eventosExtendidos = $eventosNacimiento->map(function ($evento) {
-        return [
-            'codigo' => $evento->codigo,
-            'especie' => $evento->especie,
-            'origen' => 'evento',
-        ];
-    });
-
-    $animalesDisponibles = $faunasExtendidas->concat($eventosExtendidos);
-
     return view(
         'eventos.create' . ($tipo ? "_{$tipo}" : ""),
         compact(
             'faunas',
             'tiposEvento',
             'instituciones',
-            'faunasJson',
             'tipo',
             'codigoNuevo',
             'animalesDisponibles'
         )
     );
 }
+
 
     public function store(Request $request)
 {
@@ -149,6 +161,8 @@ class EventoController extends Controller
         'sexo' => 'nullable|string',
         'tratamientos_realizados' => 'nullable|string',
         'estado_general' => 'nullable|string',
+        'senas_particulares' => 'nullable|string',
+    'codigo_padres' => 'nullable|string',
     ]);
 
     $validated['user_id'] = Auth::id();
@@ -206,16 +220,22 @@ class EventoController extends Controller
     return redirect()->route('eventos.index')->with('success', 'Evento registrado exitosamente.');
 }
 
-    public function show($id)
-    {
-        $evento = Evento::with('fauna', 'tipoEvento', 'institucion')->findOrFail($id);
+   public function show($id)
+{
+    $evento = Evento::with('fauna', 'tipoEvento', 'institucion')
+                    ->findOrFail($id);
 
-        if ($evento->institucion_id !== Auth::user()->institucion_id) {
-            abort(403);
-        }
-
-        return view('eventos.show', compact('evento'));
+    // Control de acceso
+    if ($evento->institucion_id !== Auth::user()->institucion_id) {
+        abort(403);
     }
+
+    // Validación opcional para visualizar todo en desarrollo
+    // dd($evento); 
+
+    return view('eventos.show', compact('evento'));
+}
+
 
     public function edit($id)
     {

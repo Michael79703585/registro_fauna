@@ -62,7 +62,6 @@
       <ul class="flex space-x-6 font-medium text-lg">
         <li><a href="#inicio" class="hover:text-yellow-400 transition duration-200">Inicio</a></li>
         <li><a href="#publicaciones" class="hover:text-yellow-400 transition duration-200">Publicaciones</a></li>
-        <li><a href="#videos" class="hover:text-yellow-400 transition duration-200">Videos</a></li>
         <li><a href="#contacto" class="hover:text-yellow-400 transition duration-200">Contacto</a></li>
 
         @guest
