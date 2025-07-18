@@ -19,91 +19,103 @@ class EventoController extends Controller
     }
 
     public function create($tipo = null)
-    {
-        $usuario = Auth::user();
+{
+    $usuario = Auth::user();
 
-        $faunas = Fauna::where(function($query) use ($usuario) {
+    // Obtener faunas relacionadas al usuario o su institución
+    $faunas = Fauna::where(function($query) use ($usuario) {
+        $query->where('user_id', $usuario->id)
+            ->orWhereIn('id', function ($subquery) {
+                $subquery->select('fauna_id')
+                    ->from('transferencias')
+                    ->where('estado', 'aceptado');
+            })
+            ->orWhereIn('user_id', function($subquery) use ($usuario) {
+                $subquery->select('id')
+                    ->from('users')
+                    ->where('institucion_id', $usuario->institucion_id);
+            });
+    })->get();
+
+    $tiposEvento = TipoEvento::all();
+    $instituciones = Institucion::all();
+
+    // Extender faunas para unir con eventos
+    $faunasExtendidas = $faunas->map(function ($fauna) {
+        return [
+            'codigo' => $fauna->codigo,
+            'especie' => $fauna->especie,
+            'nombre_comun' => $fauna->nombre_comun,
+            'sexo' => $fauna->sexo,
+            'origen' => 'fauna',
+        ];
+    });
+
+    // Obtener eventos de tipo 'Nacimiento' relacionados al usuario o institución
+    $eventosNacimiento = Evento::whereHas('tipoEvento', function ($q) {
+            $q->where('nombre', 'Nacimiento');
+        })
+        ->where(function($query) use ($usuario) {
             $query->where('user_id', $usuario->id)
-                ->orWhereIn('id', function ($subquery) {
-                    $subquery->select('fauna_id')
+                ->orWhereIn('fauna_id', function ($q) {
+                    $q->select('fauna_id')
                         ->from('transferencias')
                         ->where('estado', 'aceptado');
                 })
-                ->orWhereIn('user_id', function($subquery) use ($usuario) {
-                    $subquery->select('id')
+                ->orWhereIn('user_id', function($q) use ($usuario){
+                    $q->select('id')
                         ->from('users')
                         ->where('institucion_id', $usuario->institucion_id);
                 });
-        })->get();
+        })
+        ->get(['codigo', 'especie', 'nombre_comun', 'sexo']);
 
-        $tiposEvento = TipoEvento::all();
-        $instituciones = Institucion::all();
+    // Extender eventos para unir con faunas
+    $eventosExtendidos = $eventosNacimiento->map(function ($evento) {
+        return [
+            'codigo' => $evento->codigo,
+            'especie' => $evento->especie,
+            'nombre_comun' => $evento->nombre_comun ?? null,
+            'sexo' => $evento->sexo ?? null,
+            'origen' => 'evento',
+        ];
+    });
 
-        $faunasExtendidas = $faunas->map(function ($fauna) {
-            return [
-                'codigo' => $fauna->codigo,
-                'especie' => $fauna->especie,
-                'nombre_comun' => $fauna->nombre_comun,
-                'sexo' => $fauna->sexo,
-                'origen' => 'fauna',
-            ];
-        });
+    // Unir faunas y eventos, eliminar duplicados por código
+    $animalesDisponibles = $faunasExtendidas
+        ->concat($eventosExtendidos)
+        ->unique('codigo')
+        ->values();
 
-        $eventosNacimiento = Evento::whereHas('tipoEvento', function ($q) {
-                $q->where('nombre', 'Nacimiento');
-            })
-            ->where(function($query) use ($usuario) {
-                $query->where('user_id', $usuario->id)
-                    ->orWhereIn('fauna_id', function ($q) {
-                        $q->select('fauna_id')
-                            ->from('transferencias')
-                            ->where('estado', 'aceptado');
-                    })
-                    ->orWhereIn('user_id', function($q) use ($usuario){
-                        $q->select('id')
-                            ->from('users')
-                            ->where('institucion_id', $usuario->institucion_id);
-                    });
-            })
-            ->get(['codigo', 'especie', 'nombre_comun', 'sexo']);
+    // Asegurar tipo en mayúscula inicial y vista en minúsculas
+    $tipo = $tipo ? ucfirst(strtolower($tipo)) : null;
 
-        $eventosExtendidos = $eventosNacimiento->map(function ($evento) {
-            return [
-                'codigo' => $evento->codigo,
-                'especie' => $evento->especie,
-                'nombre_comun' => $evento->nombre_comun ?? null,
-                'sexo' => $evento->sexo ?? null,
-                'origen' => 'evento',
-            ];
-        });
+    $codigoNuevo = null;
 
-        $animalesDisponibles = $faunasExtendidas
-            ->concat($eventosExtendidos)
-            ->unique('codigo')
-            ->values();
-
-        $tipo = $tipo ? ucfirst(strtolower($tipo)) : null;
-        $codigoNuevo = null;
-
-        if ($tipo === 'Nacimiento') {
-            $tipoEventoNacimiento = TipoEvento::where('nombre', 'Nacimiento')->first();
-            if ($tipoEventoNacimiento) {
-                $codigoNuevo = $this->generarCodigoNacimiento($tipoEventoNacimiento->id);
-            }
+    if ($tipo === 'Nacimiento') {
+        $tipoEventoNacimiento = TipoEvento::where('nombre', 'Nacimiento')->first();
+        if ($tipoEventoNacimiento) {
+            $codigoNuevo = $this->generarCodigoNacimiento($tipoEventoNacimiento->id);
         }
-
-        return view(
-            'eventos.create' . ($tipo ? '_' . strtolower($tipo) : ''),
-            compact(
-                'faunas',
-                'tiposEvento',
-                'instituciones',
-                'tipo',
-                'codigoNuevo',
-                'animalesDisponibles'
-            )
-        );
     }
+
+    // Construir nombre de la vista
+    $vista = 'eventos.create' . ($tipo ? '_' . strtolower($tipo) : '');
+
+    // Verificar si la vista existe, si no usar vista por defecto
+    if (!view()->exists($vista)) {
+        $vista = 'eventos.create';
+    }
+
+    return view($vista, compact(
+        'faunas',
+        'tiposEvento',
+        'instituciones',
+        'tipo',
+        'codigoNuevo',
+        'animalesDisponibles'
+    ));
+}
 
     public function store(Request $request)
 {
