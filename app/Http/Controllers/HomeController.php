@@ -17,7 +17,7 @@ class HomeController extends Controller
     {
         // Obtener publicaciones y videos ordenados por fecha más reciente
         $publicaciones = Publication::latest()->get();
-        $videos = Video::latest()->get();
+      
 
         // Retornar la vista welcome con las variables correctas
         return view('welcome', compact('publicaciones', 'videos'));
