@@ -131,14 +131,19 @@
                         <td class="px-3 py-2 border">{{ $liberacion->observaciones }}</td>
 
                         {{-- 13. Fotografía --}}
-                        <td class="px-3 py-2 border text-center">
-                            @if ($liberacion->foto)
-                                <img src="{{ asset('storage/' . $liberacion->foto) }}" alt="Foto de liberación"
-                                     class="h-12 w-12 object-cover rounded">
-                            @else
-                                <span class="text-gray-400">Sin foto</span>
-                            @endif
-                        </td>
+<td class="px-3 py-2 border text-center">
+    @php
+        $rutaFoto = storage_path('app/public/' . $liberacion->foto);
+    @endphp
+
+    @if ($liberacion->foto && file_exists($rutaFoto))
+        <img src="{{ asset('storage/' . $liberacion->foto) }}" alt="Foto de liberación"
+             class="h-12 w-12 object-cover rounded">
+    @else
+        <span class="text-gray-400">Sin foto</span>
+    @endif
+</td>
+
 
                         {{-- Acciones --}}
 <td class="px-3 py-2 border text-center">

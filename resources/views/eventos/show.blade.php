@@ -29,7 +29,7 @@
         </div>
 
         <div>
-            @if($evento->foto)
+            @if($evento->foto && file_exists(storage_path('app/public/' . $evento->foto)))
                 <img src="{{ asset('storage/' . $evento->foto) }}" alt="Foto evento" class="w-full rounded shadow mb-4" />
             @else
                 <p class="italic text-gray-600">Sin foto disponible</p>
@@ -93,3 +93,16 @@
     </div>
 </div>
 @endsection
+
+{{-- Si usas JavaScript que acceda a elementos DOM, valida así para evitar errores --}}
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const element = document.getElementById('inputId'); // Cambia 'inputId' por el id que uses
+    if(element) {
+        // Código que use element.value u otras propiedades
+        // Ejemplo: console.log(element.value);
+    }
+});
+</script>
+@endpush

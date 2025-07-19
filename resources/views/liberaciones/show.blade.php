@@ -48,14 +48,19 @@
 
     {{-- Fotografía --}}
     <div class="text-center mt-8">
-        <p class="text-lg font-semibold text-gray-700 mb-2">📸 Fotografía</p>
-        @if ($liberacion->foto && file_exists(storage_path('app/public/' . $liberacion->foto)))
-            <img src="{{ asset('storage/' . $liberacion->foto) }}" alt="Fotografía de la liberación"
-                 class="mx-auto max-w-xs rounded-lg border shadow-md transition-transform hover:scale-105 duration-200">
-        @else
-            <p class="text-gray-500 italic">No se ha subido ninguna fotografía.</p>
-        @endif
-    </div>
+    <p class="text-lg font-semibold text-gray-700 mb-2">📸 Fotografía</p>
+    @php
+        // Ruta completa donde se debería encontrar la foto en storage
+        $rutaFoto = storage_path('app/public/' . $liberacion->foto);
+    @endphp
+
+    @if ($liberacion->foto && file_exists($rutaFoto))
+        <img src="{{ asset('storage/' . $liberacion->foto) }}" alt="Fotografía de la liberación"
+             class="mx-auto max-w-xs rounded-lg border shadow-md transition-transform hover:scale-105 duration-200">
+    @else
+        <p class="text-gray-500 italic">No se ha subido ninguna fotografía o no se encontró el archivo.</p>
+    @endif
+</div>
 
     {{-- Botones --}}
     <div class="pt-8 flex flex-wrap gap-4 justify-center">

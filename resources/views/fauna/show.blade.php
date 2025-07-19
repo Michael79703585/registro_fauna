@@ -16,7 +16,6 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @php
             $fields = [
-                // Información general y administrativa
                 '📅 Fecha de Ingreso' => $fauna->fecha_ingreso,
                 '📥 Fecha de Recepción' => $fauna->fecha_recepcion,
                 '🆔 Código Asignado' => $fauna->codigo,
@@ -29,20 +28,17 @@
                 '📦 Tipo de Elemento' => $fauna->tipo_elemento,
                 '📖 Motivo de Ingreso' => $fauna->motivo_ingreso,
 
-                // Información del animal
                 '🐾 Tipo de Animal' => $fauna->tipo_animal,
                 '🌱 Especie' => $fauna->especie,
                 '🔤 Nombre Común' => $fauna->nombre_comun,
                 '🎂 Edad Aparente' => $fauna->edad_aparente,
                 '⚧ Sexo' => ucfirst($fauna->sexo),
 
-                // Estado y comportamiento
                 '🩺 Estado General' => $fauna->estado_general,
                 '🧠 Comportamiento' => $fauna->comportamiento,
                 '🤒 Descripción de Enfermedad' => $fauna->descripcion_enfermedad,
                 '🧬 Alteraciones Evidentes' => $fauna->alteraciones_evidentes,
 
-                // Observaciones y detalles adicionales
                 '📝 Otras Observaciones' => $fauna->otras_observaciones,
                 '⏳ Tiempo de Cautiverio' => $fauna->tiempo_cautiverio,
                 '🏠 Tipo de Alojamiento' => $fauna->tipo_alojamiento,
@@ -50,7 +46,6 @@
                 '🤕 Padeció Enfermedad' => $fauna->descripcion_padecimiento,
                 '🍽️ Tipo de Alimentación' => $fauna->tipo_alimentacion,
 
-                // Derivación
                 '🏥 Derivado a CCFS' => $fauna->descripcion_derivacion,
             ];
         @endphp
@@ -72,8 +67,12 @@
     {{-- Fotografía --}}
     <div class="text-center mt-8">
         <p class="text-lg font-semibold text-gray-700 mb-2">📸 Fotografía del Animal</p>
-        @if ($fauna->foto && file_exists(public_path('storage/' . $fauna->foto)))
-            <img src="{{ asset('storage/' . $fauna->foto) }}" alt="Foto del animal"
+        @php
+            $fotoPath = $fauna->foto ? ('fotos/' . basename($fauna->foto)) : null;
+        @endphp
+
+        @if ($fotoPath && Storage::disk('public')->exists($fotoPath))
+            <img src="{{ asset('storage/' . $fotoPath) }}" alt="Foto del animal"
                  class="mx-auto max-w-xs rounded-lg border shadow-md transition-transform hover:scale-105 duration-200">
         @else
             <p class="text-gray-500 italic">No disponible</p>

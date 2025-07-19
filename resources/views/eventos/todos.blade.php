@@ -158,4 +158,20 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tipoInput = document.getElementById('tipo');
+    if (tipoInput) {
+        const tipoValue = tipoInput.value;
+        // Aquí podrías usar tipoValue si quieres (ejemplo console)
+        // console.log('Tipo seleccionado:', tipoValue);
+    }
+
+    const codigoInput = document.getElementById('codigo');
+    if (codigoInput) {
+        const codigoValue = codigoInput.value;
+        // console.log('Código animal:', codigoValue);
+    }
+});
+</script>
 @endsection

@@ -78,7 +78,7 @@
                     <th class="px-3 py-2 border">Fecha</th>
                     <th class="px-3 py-2 border">Disposición Final</th>
                     <th class="px-3 py-2 border">Observaciones</th>
-                    <th class="px-3 py-2 border text-center">Foto</th> <!-- Nueva columna -->
+                    <th class="px-3 py-2 border text-center">Foto</th>
                     <th class="px-3 py-2 border text-center">Acciones</th>
                 </tr>
             </thead>
@@ -104,51 +104,46 @@
                         <td class="px-3 py-2 border">{{ $parte->observaciones }}</td>
 
                         <td class="px-3 py-2 border text-center">
-    @if ($parte->foto && file_exists(public_path('storage/partes_fotos/' . $parte->foto)))
-    <img src="{{ asset('storage/partes_fotos/' . $parte->foto) }}" alt="Foto" class="w-32 h-32 rounded shadow">
-@else
-    <p class="text-gray-500 italic">Foto no disponible</p>
-@endif
-
-
-
-</td>
-
+                            @if ($parte->foto && file_exists(public_path('storage/partes_fotos/' . $parte->foto)))
+                                <img src="{{ asset('storage/partes_fotos/' . $parte->foto) }}" alt="Foto" class="w-32 h-32 rounded shadow">
+                            @else
+                                <p class="text-gray-500 italic">Foto no disponible</p>
+                            @endif
+                        </td>
 
                         <td class="px-3 py-2 border text-center flex flex-col items-center space-y-2">
-    <a href="{{ route('partes.show', $parte->id) }}"
-        class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs shadow">
-        Ver
-    </a>
+                            <a href="{{ route('partes.show', $parte->id) }}"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs shadow">
+                                Ver
+                            </a>
 
-    <a href="{{ route('partes.pdf', $parte->id) }}"
-        class="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-xs shadow"
-        target="_blank" title="Descargar PDF">
-        PDF
-    </a>
+                            <a href="{{ route('partes.pdf', $parte->id) }}"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-xs shadow"
+                                target="_blank" title="Descargar PDF">
+                                PDF
+                            </a>
 
-    <a href="{{ route('partes.duplicar', $parte->id) }}"
-        class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs shadow"
-        title="Duplicar registro">
-        Duplicar
-    </a>
+                            <a href="{{ route('partes.duplicar', $parte->id) }}"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs shadow"
+                                title="Duplicar registro">
+                                Duplicar
+                            </a>
 
-    <a href="{{ route('partes.edit', $parte->id) }}"
-        class="inline-flex items-center gap-1 px-2 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-xs shadow">
-        Editar
-    </a>
+                            <a href="{{ route('partes.edit', $parte->id) }}"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-xs shadow">
+                                Editar
+                            </a>
 
-    <form action="{{ route('partes.destroy', $parte->id) }}" method="POST"
-        class="inline-flex" onsubmit="return confirm('¿Eliminar este registro?')">
-        @csrf
-        @method('DELETE')
-        <button type="submit"
-            class="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-xs shadow">
-            Eliminar
-        </button>
-    </form>
-</td>
-
+                            <form action="{{ route('partes.destroy', $parte->id) }}" method="POST"
+                                class="inline-flex" onsubmit="return confirm('¿Eliminar este registro?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-xs shadow">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
 
                     </tr>
                 @empty
@@ -165,4 +160,24 @@
         {{ $partes->links() }}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Ejemplo para acceder a inputs de filtro sin error si no existen
+    const codigoInput = document.getElementById('codigo');
+    const fechaInicioInput = document.getElementById('fecha_inicio');
+    const fechaFinInput = document.getElementById('fecha_fin');
+
+    if (codigoInput) {
+        // puedes leer codigoInput.value o agregar lógica aquí sin riesgo de error
+        // console.log('Código:', codigoInput.value);
+    }
+    if (fechaInicioInput) {
+        // console.log('Fecha inicio:', fechaInicioInput.value);
+    }
+    if (fechaFinInput) {
+        // console.log('Fecha fin:', fechaFinInput.value);
+    }
+});
+</script>
 @endsection

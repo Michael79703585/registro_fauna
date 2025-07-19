@@ -92,4 +92,16 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // No inputs here, but if you add any in future, check existence before reading .value
+    // Example:
+    // const someInput = document.getElementById('someInputId');
+    // if(someInput) {
+    //     const val = someInput.value;
+    //     // Do something
+    // }
+});
+</script>
 @endsection
