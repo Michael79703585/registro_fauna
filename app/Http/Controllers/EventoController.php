@@ -419,6 +419,39 @@ public function exportarExcel(Request $request)
     return Excel::download(new EventosExport($eventos), 'eventos.xlsx');
 }
 
+protected function validateEvento(Request $request, $tipoEventoNombre)
+{
+    $rules = [
+        'tipo_evento_id' => 'required|exists:tipo_eventos,id',
+        'fecha' => 'required|date',
+        'observaciones' => 'nullable|string',
+        'foto' => 'nullable|image|max:2048',
+        'especie' => 'nullable|string',
+        'nombre_comun' => 'nullable|string',
+        'causas_deceso' => 'nullable|string',
+        'descripcion_fuga' => 'nullable|string|max:1000',
+        'codigo_animal' => 'nullable|string',
+        'codigo' => 'nullable|string',
+        'sexo' => 'nullable|string',
+        'tratamientos_realizados' => 'nullable|string',
+        'estado_general' => 'nullable|string',
+        'senas_particulares' => 'nullable|string',
+        'codigo_padres' => 'nullable|string',
+    ];
+
+    // Ajustar reglas según tipo de evento
+    $tipo = strtolower($tipoEventoNombre);
+
+    if ($tipo === 'nacimiento') {
+        $rules['codigo'] = 'nullable|string';
+    }
+
+    if (in_array($tipo, ['fuga', 'deceso'])) {
+        $rules['codigo_animal'] = 'required|string';
+    }
+
+    return $request->validate($rules);
+}
 
 
 }
