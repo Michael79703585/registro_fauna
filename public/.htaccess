@@ -5,24 +5,24 @@
 
     RewriteEngine On
 
-    # Allow access to storage symlink
+    # Permitir acceso a archivos del storage mediante el symlink
     RewriteCond %{REQUEST_URI} ^/storage/
     RewriteRule ^storage/(.*)$ /storage/$1 [L,QSA]
 
-    # Handle Authorization Header
+    # Manejo del header Authorization (para APIs y autenticación)
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+    # Manejo del header XSRF-Token (para seguridad CSRF)
+    RewriteCond %{HTTP:X-XSRF-TOKEN} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-TOKEN}]
 
-    # Redirect Trailing Slashes If Not A Folder...
+    # Redirigir URLs con slash final, si no es carpeta
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # Redirigir todas las peticiones a index.php si no es archivo o directorio
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
