@@ -248,19 +248,44 @@ class EventoController extends Controller
 
 
       public function edit($id)
-    {
-        $evento = Evento::findOrFail($id);
+{
+    $evento = Evento::with('tipoEvento')->findOrFail($id);
 
-        if ($evento->institucion_id !== Auth::user()->institucion_id) {
-            abort(403);
-        }
-
-        $faunas = Fauna::all();
-        $tiposEvento = TipoEvento::all();
-        $tipo = ucfirst(strtolower($evento->tipoEvento->nombre));
-
-        return view('eventos.edit_' . strtolower($tipo), compact('evento', 'faunas', 'tiposEvento', 'tipo'));
+    if ($evento->institucion_id !== Auth::user()->institucion_id) {
+        abort(403, 'No tienes permiso para editar este evento.');
     }
+
+    $usuario = Auth::user();
+
+    // Obtener faunas relacionadas al usuario o institución
+    $faunas = Fauna::where(function($query) use ($usuario) {
+        $query->where('user_id', $usuario->id)
+            ->orWhereIn('id', function ($subquery) {
+                $subquery->select('fauna_id')
+                    ->from('transferencias')
+                    ->where('estado', 'aceptado');
+            })
+            ->orWhereIn('user_id', function($subquery) use ($usuario) {
+                $subquery->select('id')
+                    ->from('users')
+                    ->where('institucion_id', $usuario->institucion_id);
+            });
+    })->get();
+
+    $tiposEvento = TipoEvento::all();
+    $instituciones = Institucion::all();
+
+    $tipo = ucfirst(strtolower($evento->tipoEvento->nombre));
+
+    // Determinar vista específica según tipo de evento
+    $vista = 'eventos.edit_' . strtolower($tipo);
+
+    if (!view()->exists($vista)) {
+        $vista = 'eventos.edit';
+    }
+
+    return view($vista, compact('evento', 'faunas', 'tiposEvento', 'instituciones', 'tipo'));
+}
 
 
     public function update(Request $request, $id)

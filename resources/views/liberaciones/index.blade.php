@@ -196,3 +196,16 @@
         </div>
     </div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Valor del código:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no encontrado, evitando error');
+    }
+});
+</script>
+@endsection

@@ -94,15 +94,15 @@
 </div>
 @endsection
 
-{{-- Si usas JavaScript que acceda a elementos DOM, valida así para evitar errores --}}
-@push('scripts')
+@section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const element = document.getElementById('inputId'); // Cambia 'inputId' por el id que uses
-    if(element) {
-        // Código que use element.value u otras propiedades
-        // Ejemplo: console.log(element.value);
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Código capturado:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no existe en esta vista');
     }
 });
 </script>
-@endpush
+@endsection

@@ -159,18 +159,16 @@
     </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const tipoInput = document.getElementById('tipo');
-    if (tipoInput) {
-        const tipoValue = tipoInput.value;
-        // Aquí podrías usar tipoValue si quieres (ejemplo console)
-        // console.log('Tipo seleccionado:', tipoValue);
-    }
+@endsection
 
-    const codigoInput = document.getElementById('codigo');
-    if (codigoInput) {
-        const codigoValue = codigoInput.value;
-        // console.log('Código animal:', codigoValue);
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Código capturado:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no existe en esta vista');
     }
 });
 </script>

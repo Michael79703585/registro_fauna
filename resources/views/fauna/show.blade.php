@@ -103,3 +103,16 @@
 
 </div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Código capturado:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no existe en esta vista');
+    }
+});
+</script>
+@endsection

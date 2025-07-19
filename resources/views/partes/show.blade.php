@@ -92,16 +92,17 @@
     </div>
 
 </div>
+@endsection
 
+@section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // No inputs here, but if you add any in future, check existence before reading .value
-    // Example:
-    // const someInput = document.getElementById('someInputId');
-    // if(someInput) {
-    //     const val = someInput.value;
-    //     // Do something
-    // }
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Valor del código:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no encontrado, evitando error');
+    }
 });
 </script>
 @endsection
