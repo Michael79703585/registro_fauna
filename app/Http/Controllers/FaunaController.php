@@ -104,7 +104,7 @@ class FaunaController extends Controller
         'tipo_alimentacion' => 'nullable|string',
         'derivacion_ccfs' => 'nullable|string|in:SI,NO',
         'descripcion_derivacion' => 'nullable|string',
-        'foto' => 'nullable|image|max:2048',
+        'foto' => 'nullable|image|max:10048',
     ]);
 
     // Guardar archivo de foto
@@ -188,7 +188,7 @@ class FaunaController extends Controller
         'tipo_alimentacion' => 'nullable|string',
         'derivacion_ccfs' => 'nullable|string|in:SI,NO',
         'descripcion_derivacion' => 'nullable|string',
-        'foto' => 'nullable|image|max:2048',
+        'foto' => 'nullable|image|max:10048',
     ]);
 
     // Convertir campos de SI/NO a booleanos
