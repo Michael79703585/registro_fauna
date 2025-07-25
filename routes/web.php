@@ -59,18 +59,31 @@ Route::get('/usuarios/{usuario}/historiales', [App\Http\Controllers\UserControll
 
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/publicaciones/{publication}', [PublicationController::class, 'show'])->name('publication.show');
-});
+
+// Ruta pública principal que muestra publicaciones en welcome.blade.php
 Route::get('/', function () {
-    $publications = \App\Models\Publication::latest()->get();
-    return view('welcome', compact('publications'));
+    $publicaciones = \App\Models\Publication::latest()->get();
+    return view('welcome', compact('publicaciones'));
 });
 
+// Redireccionar '/' a '/home'
 Route::redirect('/', '/home');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::resource('publication', PublicationController::class);
 
+// Ruta home después del login
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+// Grupo de rutas protegidas por auth para publicaciones
+Route::middleware(['auth'])->group(function () {
+    // Rutas resource para publicaciones excepto 'index' (index es público en '/')
+    Route::resource('publicaciones', PublicationController::class)->except(['index']);
+
+    // Ruta para actualizar imagen individual de la publicación
+    Route::put('publicaciones/{publicacion}/imagen', [PublicationController::class, 'updateSingleImage'])->name('publicaciones.updateImage');
+
+    Route::delete('/publicaciones/{publication}/file/{index}', [PublicationController::class, 'destroyFile'])
+    ->name('publicaciones.file.destroy');
+
+});
 
 Route::get('/fauna/plantilla-descarga', function () {
     $filePath = storage_path('app/public/plantilla-fauna.pdf');

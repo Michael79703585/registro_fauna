@@ -225,14 +225,9 @@ class FaunaController extends Controller
 
 public function reportePdf(Request $request)
 {
-    $userId = Auth::id();
+    $query = Fauna::query();
 
-    $query = Fauna::where('user_id', $userId);
-
-    // Si usas soft deletes, así te aseguras que no aparezcan registros eliminados:
-    // $query->whereNull('deleted_at'); // Esto es solo si no usas SoftDeletes trait
-
-    // Aplica filtro de institución, si lo quieres igual que index
+    // Filtrar por institución del usuario autenticado
     if (Auth::check()) {
         $userInstitution = Auth::user()->institucion->nombre ?? null;
         if ($userInstitution) {
@@ -240,7 +235,7 @@ public function reportePdf(Request $request)
         }
     }
 
-    // Aplica los filtros de fecha y código sólo si vienen en la request
+    // Aplicar filtros adicionales (fecha, código, etc.)
     $query = $this->aplicarFiltros($request, $query);
 
     $faunas = $query->get();
@@ -251,12 +246,12 @@ public function reportePdf(Request $request)
     return $pdf->download('reporte_fauna_filtrado.pdf');
 }
 
+
 public function reporteExcel(Request $request)
 {
-    $userId = Auth::id();
+    $query = Fauna::query();
 
-    $query = Fauna::where('user_id', $userId);
-
+    // Filtrar por institución del usuario autenticado
     if (Auth::check()) {
         $userInstitution = Auth::user()->institucion->nombre ?? null;
         if ($userInstitution) {
@@ -264,12 +259,14 @@ public function reporteExcel(Request $request)
         }
     }
 
+    // Aplicar filtros adicionales (fecha, código, etc.)
     $query = $this->aplicarFiltros($request, $query);
 
     $faunas = $query->get();
 
     return Excel::download(new \App\Exports\FaunasExport($faunas), 'reporte_fauna_filtrado.xlsx');
 }
+
 
 
 public function destroy($id)

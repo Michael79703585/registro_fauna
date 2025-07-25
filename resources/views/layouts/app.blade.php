@@ -7,6 +7,15 @@
 
     <title>@yield('title', 'Panel de Control - Fauna Silvestre')</title>
 
+<title>Publicaciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+<!-- Feather Icons -->
+<script src="https://unpkg.com/feather-icons"></script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -365,16 +374,18 @@
 
     </style>
 </head>
+
+
 <body>
     @if(session('success'))
         <div class="fixed top-5 right-5 bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down">
             {{ session('success') }}
         </div>
     @endif
-
+      
     <div class="flex min-h-screen overflow-auto">
         <aside>
-            <div>🐾 <span>Fauna Control</span></div>
+            <div>🐾 <span class="text-sm">PANEL DE CONTROL</span></div>
             <nav>
                 <x-sidebar-link route="fauna.index" icon="📋" label="Registros" />
                 <x-sidebar-link route="historial.index" icon="🩺" label="Historial clínico" />
@@ -449,9 +460,14 @@
             <main class="content-wrapper">
                 <header>
                     <div>
-                        <h1>@yield('title', 'Panel de Control')</h1>
+                        <img src="{{ asset('storage/logo3.png') }}" class="h-10" alt="Logo Gobernación" />
+      <ul class="flex space-x-6 text-sm font-semibold">
                         <p class="subtitle">Gestión integral de fauna silvestre</p>
                     </div>
+
+                    <div class="flex space-x-6 items-center">
+
+            
                     <div class="flex items-center gap-4">
                         <div class="user-info">
                             @if(Auth::check())
@@ -464,8 +480,21 @@
                                 <p class="institution">🏢 {{ $institucion->nombre ?? '' }}</p>
                             @endif
                         </div>
-                        <a href="{{ route('perfil.show') }}" class="profile-btn" title="Ver perfil de usuario">Perfil</a>
-                    </div>
+                        <div class="flex flex-col items-end space-y-3">
+    <!-- Botón Perfil -->
+    <a href="{{ route('perfil.show') }}"
+       class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-lg shadow hover:bg-gray-300 transition"
+       title="Ver perfil de usuario">
+        <i class="fas fa-user mr-2"></i> Perfil
+    </a>
+
+    <!-- Botón Publicaciones -->
+    <a href="{{ route('publicaciones.index') }}"
+       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-700 transition">
+        <i class="fas fa-newspaper mr-2"></i> Publicaciones
+    </a>
+</div>
+
                 </header>
 
                 @if(request()->routeIs('dashboard'))
@@ -476,8 +505,7 @@
                         Bienvenido al Panel de Control. Desde aquí puedes gestionar, monitorear y mantener el seguimiento de la fauna silvestre de forma eficiente y organizada.
                     </p>
 
-                    <!-- Gráfico de registros -->
-                    <canvas id="faunaChart" style="max-width: 100%; margin-bottom: 2rem;"></canvas>
+                
 
                     <script>
                         document.addEventListener('DOMContentLoaded', () => {
@@ -613,6 +641,14 @@
     });
   });
 </script>
+
+<script>
+  feather.replace();
+</script>
+
+<script src="https://unpkg.com/feather-icons"></script>
+<script>feather.replace();</script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
 </body>
 </html>

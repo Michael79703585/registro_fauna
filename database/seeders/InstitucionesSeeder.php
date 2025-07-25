@@ -16,7 +16,7 @@ class InstitucionesSeeder extends Seeder
                 'telefono' => '123456789',
             ],
             [
-                'nombre' => 'GOBIERNO AUTONOMO DEPARTAMENTAL DE COCHABAMBA',
+                'nombre' => 'GOBIERNO AUTÓNOMO DEPARTAMENTAL DE COCHABAMBA',
                 'direccion' => 'Dirección de la Gobernacion',
                 'telefono' => '987654321',
             ],
@@ -58,7 +58,7 @@ class InstitucionesSeeder extends Seeder
             ],
             
              [
-                'nombre' => 'CENTRO DE ATENCION Y DERIVACION GAM COCHABAMBA',
+                'nombre' => 'CENTRO DE ATENCIÓN Y DERIVACIÓN GAM COCHABAMBA',
                 'direccion' => 'Dirección del CAD',
                 'telefono' => '987654321',
             ],
@@ -95,281 +95,274 @@ class InstitucionesSeeder extends Seeder
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE COCHABAMBA',
+                'nombre' => 'GOBIERNO AUTÓNOMO  MUNICIPAL DE COCHABAMBA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE COLCAPIRHUA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE COLCAPIRHUA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE QUILLACOLLO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE QUILLACOLLO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SACABA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SACABA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SIPE SIPE',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SIPE SIPE',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE VINTO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE VINTO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TIQUIPAYA',
-                'direccion' => 'Dirección del Municipio',
-                'telefono' => '987654321',
-            ],
-
-            [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE AIQUILE',
-                'direccion' => 'Dirección del Municipio',
-                'telefono' => '987654321',
-            ],
-            [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE ANZALDO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TIQUIPAYA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE ARANI',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE AIQUILE',
+                'direccion' => 'Dirección del Municipio',
+                'telefono' => '987654321',
+            ],
+            [
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE ANZALDO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE ARBIETO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE ARANI',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE CAPINOTA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE ARBIETO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE CHIMORE',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE CAPINOTA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE CLIZA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE CHIMORE',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE COCAPATA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE CLIZA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE COLOMI',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE COCAPATA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE ENTRE RIOS',
-                'direccion' => 'Dirección del Municipio',
-                'telefono' => '987654321',
-            ],
-            [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE INDEPENDENCIA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE COLOMI',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE MIZQUE',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE ENTRE RIOS',
+                'direccion' => 'Dirección del Municipio',
+                'telefono' => '987654321',
+            ],
+            [
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE INDEPENDENCIA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE MOROCHATA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE MIZQUE',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE OMEREQUE',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE MOROCHATA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE PASORAPA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE OMEREQUE',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE POCONA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE PASORAPA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE POJO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE POCONA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE PUNATA',
-                'direccion' => 'Dirección del Municipio',
-                'telefono' => '987654321',
-            ],
-            [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE RAQAYPAMPA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE POJO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TARATA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE PUNATA',
+                'direccion' => 'Dirección del Municipio',
+                'telefono' => '987654321',
+            ],
+            [
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE RAQAYPAMPA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TOLATA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TARATA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SACABAMBA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TOLATA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SAN BENITO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SACABAMBA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SANTIVAÑEZ',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SAN BENITO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SHINAHOTA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SANTIVAÑEZ',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE SICAYA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SHINAHOTA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TACACHI',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE SICAYA',
+                'direccion' => 'Dirección del Municipio',
+                'telefono' => '987654321',
+            ],
+
+            [
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TACACHI',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
             
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TACOPAYA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TACOPAYA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TAPACARI',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TAPACARI',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TIRAQUE',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TIRAQUE',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TOCO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TOCO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE TOTORA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE TOTORA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE VACAS',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE VACAS',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE VILA VILA',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE VILA VILA',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE VILLA RIBERO',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE VILLA RIBERO',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE VILLA TUNARI',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE VILLA TUNARI',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE VILLA GUALBERTO VILLARROEL',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE VILLA GUALBERTO VILLARROEL',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
             
             [
-                'nombre' => 'GOBIERNO AUTONOMO MUNICIPAL DE PUERTO VILLARROEL',
+                'nombre' => 'GOBIERNO AUTÓNOMO MUNICIPAL DE PUERTO VILLARROEL',
                 'direccion' => 'Dirección del Municipio',
                 'telefono' => '987654321',
             ],
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+            [
+                'nombre' => 'OTRA INSTITUCIÓN',
+                'direccion' => 'Dirección del Municipio',
+                'telefono' => '987654321',
+            ],
 
         ]);
     }

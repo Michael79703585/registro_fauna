@@ -1,46 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto p-6 bg-white rounded shadow mt-10">
-    <h2 class="text-2xl font-bold mb-6 text-green-900">Crear Nueva Publicación</h2>
+<div class="max-w-3xl mx-auto py-10 px-4">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Nueva publicación</h2>
 
-    <form action="{{ route('publication.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form action="{{ route('publicaciones.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4 bg-white p-6 rounded-lg shadow">
         @csrf
-
         <div>
-            <label for="title" class="block font-semibold text-green-900 mb-1">Título</label>
-            <input type="text" name="title" id="title" value="{{ old('title') }}" required
-                class="w-full border border-green-300 rounded px-4 py-2 focus:ring-2 focus:ring-green-600 focus:outline-none" />
-            @error('title')
-                <p class="text-red-600 mt-1">{{ $message }}</p>
-            @enderror
+            <label class="block font-semibold text-sm mb-1">Título</label>
+            <input type="text" name="title" required class="w-full border px-3 py-2 rounded" />
         </div>
-
         <div>
-            <label for="description" class="block font-semibold text-green-900 mb-1">Descripción</label>
-            <textarea name="description" id="description" rows="4" required
-                class="w-full border border-green-300 rounded px-4 py-2 focus:ring-2 focus:ring-green-600 focus:outline-none">{{ old('description') }}</textarea>
-            @error('description')
-                <p class="text-red-600 mt-1">{{ $message }}</p>
-            @enderror
+            <label class="block font-semibold text-sm mb-1">Descripción</label>
+            <textarea name="description" rows="4" required class="w-full border px-3 py-2 rounded"></textarea>
         </div>
-
         <div>
-            <label for="images" class="block font-semibold text-green-900 mb-1">Imágenes (puedes subir varias)</label>
-            <input type="file" name="images[]" id="images" accept="image/*" multiple
-                class="w-full border border-green-300 rounded px-4 py-2 focus:ring-2 focus:ring-green-600 focus:outline-none" />
-            @error('images')
-                <p class="text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-            @error('images.*')
-                <p class="text-red-600 mt-1">{{ $message }}</p>
-            @enderror
+            <label class="block font-semibold text-sm mb-1">Imágenes o archivos (puedes subir varios)</label>
+            <input type="file" name="files[]" multiple class="w-full border px-3 py-2 rounded" />
         </div>
-
-        <button type="submit"
-            class="bg-green-800 hover:bg-green-900 text-white font-bold px-6 py-3 rounded shadow transition w-full">
-            Publicar
-        </button>
+        <div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">Publicar</button>
+        </div>
     </form>
 </div>
 @endsection

@@ -5,17 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Publication;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Video;
+use Illuminate\Support\Str;
 
 class PublicationController extends Controller
 {
-    public function index()
-    {
-        $publicaciones = Publication::latest()->get();
-        $videos = Video::latest()->get();
+  public function index()
+{
+    $publicaciones = Publication::latest()->get(); // o tu lógica
+    return view('publicaciones.index', compact('publicaciones'));
+}
 
-        return view('welcome', compact('publicaciones', 'videos'));
-    }
+
 
     public function create()
     {
@@ -28,15 +28,12 @@ class PublicationController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'files' => 'required|array',
-            'files.*' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:90240', // hasta 90MB por archivo
+            'files.*' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:90240',
         ]);
 
         $paths = [];
-
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $file) {
-                $paths[] = $file->store('publicaciones', 'public');
-            }
+        foreach ($request->file('files', []) as $file) {
+            $paths[] = $file->store('publicaciones', 'public');
         }
 
         Publication::create([
@@ -45,19 +42,25 @@ class PublicationController extends Controller
             'image_path' => json_encode($paths),
         ]);
 
-        return redirect()->route('publication.index')->with('success', '¡Publicación subida exitosamente!');
+        return redirect()->route('publicaciones.index')->with('success', '¡Publicación subida exitosamente!');
+    }
+
+    public function show(Publication $publication)
+    {
+        $publication->image_path = json_decode($publication->image_path, true);
+        return view('publicaciones.show', compact('publication'));
     }
 
     public function edit($id)
     {
-        $publicacion = Publication::findOrFail($id);
-        $publicacion->image_path = json_decode($publicacion->image_path, true);
-        return view('publicaciones.edit', compact('publicacion'));
+        $publication = Publication::findOrFail($id);
+        $publication->image_path = json_decode($publication->image_path, true);
+        return view('publicaciones.edit', compact('publication'));
     }
 
     public function update(Request $request, $id)
     {
-        $publicacion = Publication::findOrFail($id);
+        $publication = Publication::findOrFail($id);
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -65,49 +68,82 @@ class PublicationController extends Controller
             'files.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:90240',
         ]);
 
-        $publicacion->title = $request->title;
-        $publicacion->description = $request->description;
+        $publication->title = $request->title;
+        $publication->description = $request->description;
+
+        $existingFiles = json_decode($publication->image_path, true) ?? [];
 
         if ($request->hasFile('files')) {
-            // Eliminar archivos antiguos
-            $oldFiles = json_decode($publicacion->image_path, true);
-            if (is_array($oldFiles)) {
-                foreach ($oldFiles as $oldFile) {
-                    Storage::disk('public')->delete($oldFile);
-                }
-            }
-
-            $paths = [];
             foreach ($request->file('files') as $file) {
-                $paths[] = $file->store('publicaciones', 'public');
+                $existingFiles[] = $file->store('publicaciones', 'public');
             }
-
-            $publicacion->image_path = json_encode($paths);
         }
 
-        $publicacion->save();
+        $publication->image_path = json_encode($existingFiles);
+        $publication->save();
 
-        return redirect()->route('publication.index')->with('success', 'Publicación actualizada correctamente.');
+        return redirect()->route('publicaciones.index')->with('success', 'Publicación actualizada correctamente.');
     }
 
     public function destroy($id)
     {
-        $publicacion = Publication::findOrFail($id);
+        $publication = Publication::findOrFail($id);
 
-        $files = json_decode($publicacion->image_path, true);
-        if (is_array($files)) {
-            foreach ($files as $file) {
-                Storage::disk('public')->delete($file);
+        $files = json_decode($publication->image_path, true) ?? [];
+        foreach ($files as $file) {
+            Storage::disk('public')->delete($file);
+        }
+
+        $publication->delete();
+
+        return redirect()->route('publicaciones.index')->with('success', 'Publicación eliminada correctamente.');
+    }
+
+    public function updateImage(Request $request, $id)
+    {
+        $request->validate([
+            'image' => 'required|file|mimes:jpg,jpeg,png,webp|max:90120',
+        ]);
+
+        $publication = Publication::findOrFail($id);
+
+        $oldFiles = json_decode($publication->image_path, true);
+        if (is_array($oldFiles)) {
+            foreach ($oldFiles as $oldFile) {
+                Storage::disk('public')->delete($oldFile);
             }
         }
 
-        $publicacion->delete();
+        $path = $request->file('image')->store('publicaciones', 'public');
 
-        return redirect()->route('publication.index')->with('success', 'Publicación eliminada correctamente.');
+        $publication->image_path = json_encode([$path]);
+        $publication->save();
+
+        return redirect()->route('publicaciones.index')->with('success', 'Imagen actualizada correctamente.');
     }
 
-    public function show(Publication $publication)
-    {
-        return view('publicaciones.show', compact('publication'));
+    public function destroyFile($publicationId, $index)
+{
+    $publication = Publication::findOrFail($publicationId);
+
+    $files = json_decode($publication->image_path, true) ?? [];
+
+    if (isset($files[$index])) {
+        // Borra el archivo físico
+        Storage::disk('public')->delete($files[$index]);
+
+        // Elimina el archivo del array
+        array_splice($files, $index, 1);
+
+        // Actualiza la publicación
+        $publication->image_path = json_encode($files);
+        $publication->save();
+
+        return redirect()->back()->with('success', 'Archivo eliminado correctamente.');
     }
+
+    return redirect()->back()->with('error', 'Archivo no encontrado.');
+}
+
+    
 }

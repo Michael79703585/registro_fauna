@@ -168,28 +168,35 @@ class HistorialClinicoController extends Controller
 }
 
     public function reportePdf(Request $request)
-    {
-        $buscar = $request->input('buscar');
-        $user = Auth::user();
-        $faunaIds = $this->obtenerFaunaAutorizada($user);
+{
+    $buscar = $request->input('buscar');
+    $user = Auth::user();
 
-        $historiales = HistorialClinico::with('fauna')
-            ->whereIn('fauna_id', $faunaIds)
-            ->when($buscar, fn($query) => $query->whereHas('fauna', fn($q) => $q->where('codigo','like',"%$buscar%")->orWhere('nombre_comun','like',"%$buscar%")))
-            ->orderByDesc('fecha')
-            ->get();
+    // Animales autorizados por institución (propios o transferidos)
+    $faunaIds = $this->obtenerFaunaAutorizada($user);
 
-        $pdf = Pdf::loadView('historial.reporte-pdf', compact('historiales'))
-            ->setPaper('letter', 'landscape')
-            ->setOptions([
-                'margin-top' => 10,
-                'margin-bottom' => 10,
-                'margin-left' => 10,
-                'margin-right' => 10
-            ]);
+    $historiales = HistorialClinico::with('fauna')
+        ->whereIn('fauna_id', $faunaIds)
+        ->when($buscar, fn($query) => 
+            $query->whereHas('fauna', fn($q) =>
+                $q->where('codigo', 'like', "%$buscar%")
+                  ->orWhere('nombre_comun', 'like', "%$buscar%")
+            )
+        )
+        ->orderByDesc('fecha')
+        ->get();
 
-        return $pdf->download('reporte_historiales.pdf');
-    }
+    $pdf = Pdf::loadView('historial.reporte-pdf', compact('historiales'))
+        ->setPaper('letter', 'landscape')
+        ->setOptions([
+            'margin-top' => 10,
+            'margin-bottom' => 10,
+            'margin-left' => 10,
+            'margin-right' => 10,
+        ]);
+
+    return $pdf->download('reporte_historiales.pdf');
+}
 
     public function reporteExcel(Request $request)
     {
