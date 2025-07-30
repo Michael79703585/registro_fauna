@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
 <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg mt-10">
     <h1 class="text-3xl font-semibold mb-8 text-gray-800">Registrar Nueva Parte/Derivado</h1>

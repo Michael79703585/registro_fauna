@@ -3,10 +3,11 @@
 .env
 .DS_Store
 /public/storage
+# Ignorar solo llaves dentro de storage, pero no el directorio
 /storage/*.key
+# Ignorar archivos de base de datos locales
 *.log
 *.sqlite
 *.sqlite3
 .env.backup
 .idea
-

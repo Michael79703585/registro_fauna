@@ -105,4 +105,17 @@
 </div>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startSection('scripts'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Código capturado:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no existe en esta vista');
+    }
+});
+</script>
+<?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\registro_fauna\resources\views/fauna/show.blade.php ENDPATH**/ ?>

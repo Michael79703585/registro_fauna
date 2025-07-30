@@ -168,14 +168,7 @@
                                             <i class="fas fa-check"></i> Aceptar
                                         </button>
                                     </form>
-                                    <form action="<?php echo e(route('transferencias.changeStatus', $transferencia->id)); ?>" method="POST" class="inline">
-                                        <?php echo csrf_field(); ?>
-                                        <input type="hidden" name="estado" value="rechazado">
-                                        <button type="submit"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-red-500 text-white hover:bg-red-600 text-xs font-semibold shadow transition">
-                                            <i class="fas fa-times"></i> Rechazar
-                                        </button>
-                                    </form>
+                    
                                 <?php endif; ?>
                             </div>
                         </td>

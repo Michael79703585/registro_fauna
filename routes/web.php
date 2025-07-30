@@ -123,6 +123,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/fauna/duplicar/{id}', [FaunaController::class, 'duplicar'])->name('fauna.duplicar');
     Route::resource('fauna', FaunaController::class);
     Route::post('/fauna/generar-codigo-preview', [FaunaController::class, 'generarCodigoPreview']);
+    
+Route::post('/fauna/{fauna}/transferir', [FaunaController::class, 'transferirFauna'])->name('fauna.transferir');
 
 
     // Documentos de Fauna

@@ -125,7 +125,13 @@
                 </thead>
                 <tbody>
                     <?php $__empty_1 = true; $__currentLoopData = $faunas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fauna): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr class="border-b hover:bg-blue-50 transition">
+                        <?php
+    $usuarioInstitucion = strtolower(Auth::user()->institucion->nombre);
+    $esTransferido = $fauna->transferido && strtolower($fauna->institucion_remitente) !== $usuarioInstitucion;
+?>
+
+<tr class="border-b hover:bg-blue-50 transition" <?php if($esTransferido): ?> style="background-color: #e1f5fe;" <?php endif; ?>>
+
                             <td class="px-4 py-2 border"><?php echo e($fauna->codigo ?? 'N/A'); ?></td>
                             <td class="px-4 py-2 border"><?php echo e(\Carbon\Carbon::parse($fauna->fecha_recepcion)->format('d/m/Y')); ?></td>
                             <td class="px-4 py-2 border"><?php echo e($fauna->ciudad); ?></td>

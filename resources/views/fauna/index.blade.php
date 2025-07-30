@@ -125,7 +125,13 @@
                 </thead>
                 <tbody>
                     @forelse ($faunas as $fauna)
-                        <tr class="border-b hover:bg-blue-50 transition">
+                        @php
+    $usuarioInstitucion = strtolower(Auth::user()->institucion->nombre);
+    $esTransferido = $fauna->transferido && strtolower($fauna->institucion_remitente) !== $usuarioInstitucion;
+@endphp
+
+<tr class="border-b hover:bg-blue-50 transition" @if($esTransferido) style="background-color: #e1f5fe;" @endif>
+
                             <td class="px-4 py-2 border">{{ $fauna->codigo ?? 'N/A' }}</td>
                             <td class="px-4 py-2 border">{{ \Carbon\Carbon::parse($fauna->fecha_recepcion)->format('d/m/Y') }}</td>
                             <td class="px-4 py-2 border">{{ $fauna->ciudad }}</td>

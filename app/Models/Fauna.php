@@ -24,6 +24,8 @@ class Fauna extends Model
         'motivo_ingreso',
         'lugar',
         'institucion_remitente',
+        'institucion_destino', // <-- AÑADIR
+        'transferido',         // <-- AÑADIR
         'nombre_persona_recibe',
         'especie',
         'nombre_comun',
@@ -48,6 +50,7 @@ class Fauna extends Model
         'foto',
 
     ];
+
 
      public static function getInstitutionInitials(string $name): string
     {
@@ -77,7 +80,7 @@ public function documentos()
 
 public function transferencias()
 {
-    return $this->hasMany(\App\Models\Transferencia::class, 'fauna_id');
+    return $this->hasMany(Transferencia::class);
 }
 
 public function user()
@@ -112,7 +115,13 @@ public function ultimaTransferencia()
 
 public function usuario()
 {
-    return $this->belongsTo(User::class, 'usuario_id');
+    return $this->belongsTo(User::class, 'user_id');
 }
+
+public function historialTransferencias()
+{
+    return $this->hasMany(\App\Models\HistorialTransferencia::class);
+}
+
 }
 

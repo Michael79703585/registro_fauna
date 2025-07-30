@@ -11,59 +11,51 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\FaunasExport;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Models\Transferencia;
+use App\Models\User;
+use App\Models\Institucion;
+
 
 class FaunaController extends Controller
 {
-    public function index(Request $request)
+  public function index(Request $request)
 {
-    $query = Fauna::query();
+    $user = Auth::user();
+    abort_if(!$user, 403, 'Acceso denegado');
 
-    if (Auth::check()) {
-        $userInstitution = Auth::user()->institucion->nombre ?? null;
-        if ($userInstitution) {
-            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
-        }
-    }
+    // Obtener IDs de faunas autorizadas para este usuario (según la lógica que tengas)
+    $faunaAutorizada = $this->obtenerFaunaAutorizada($user);
 
+    // Iniciamos query sobre Fauna, filtrando por IDs autorizados
+    $query = Fauna::whereIn('id', $faunaAutorizada);
+
+    // Aplicar filtros si existen
     if ($request->filled('codigo')) {
         $query->where('codigo', 'like', '%' . $request->codigo . '%');
     }
 
-    // Filtros de fechas incluyendo registros sin fecha_recepcion
     if ($request->filled('fecha_inicio')) {
-        $query->where(function($q) use ($request) {
-            $q->whereNull('fecha_recepcion')
-              ->orWhereDate('fecha_recepcion', '>=', $request->fecha_inicio);
-        });
+        $query->whereDate('fecha_recepcion', '>=', $request->fecha_inicio);
     }
 
     if ($request->filled('fecha_fin')) {
-        $query->where(function($q) use ($request) {
-            $q->whereNull('fecha_recepcion')
-              ->orWhereDate('fecha_recepcion', '<=', $request->fecha_fin);
-        });
+        $query->whereDate('fecha_recepcion', '<=', $request->fecha_fin);
     }
 
     if ($request->filled('gestion')) {
-        $query->where(function($q) use ($request) {
-            $q->whereNull('fecha_recepcion')
-              ->orWhereYear('fecha_recepcion', $request->gestion);
-        });
+        $query->where('gestion', $request->gestion);
     }
 
-    // Ordenar por fecha_recepcion para que se vea más claro (NULLs primero)
-    $query->orderByRaw('fecha_recepcion IS NULL DESC')->latest('fecha_recepcion');
+    // Cargar relación con usuario para mostrar datos relacionados en la vista
+    $faunas = $query->with('user.institucion')->orderBy('created_at', 'desc')->paginate(15)->appends($request->except('page'));
 
-    $faunas = $query->paginate(10);
+    // Para llenar filtros en la vista
+    $gestiones = Fauna::select('gestion')->distinct()->pluck('gestion');
 
-    $gestiones = Fauna::selectRaw('YEAR(fecha_recepcion) as year')
-        ->whereNotNull('fecha_recepcion')
-        ->distinct()
-        ->orderBy('year', 'desc')
-        ->pluck('year');
-
+    
     return view('fauna.index', compact('faunas', 'gestiones'));
 }
+
 
 
     public function create()
@@ -158,7 +150,12 @@ class FaunaController extends Controller
 {
     $fauna = Fauna::findOrFail($id);
 
+ // 🔒 Restringe acceso a institución receptora
+    $this->authorizeInstitution($fauna);
+
     $validated = $request->validate([
+        'institucion_destino' => 'nullable|exists:instituciones,id',
+        'user_destino_id' => 'nullable|exists:users,id',
         'fecha_recepcion' => 'required|date',
         'ciudad' => 'nullable|string|max:100',
         'departamento' => 'nullable|string|max:100',
@@ -204,10 +201,20 @@ class FaunaController extends Controller
         $validated['foto'] = $request->file('foto')->store('fotos', 'public');
     }
 
+    // Guardar los datos generales
     $fauna->update($validated);
+
+    // Guardar la transferencia correctamente
+    if ($request->filled('institucion_destino')) {
+        $institucionDestinoNombre = \App\Models\Institucion::find($request->institucion_destino)?->nombre;
+        $fauna->institucion_destino = $institucionDestinoNombre;
+        $fauna->transferido = true;
+        $fauna->save();
+    }
 
     return redirect()->route('fauna.index')->with('success', 'Registro actualizado correctamente.');
 }
+
 
     public function exportPDF($id)
     {
@@ -216,29 +223,20 @@ class FaunaController extends Controller
         return $pdf->download('ficha_fauna_' . $fauna->codigo . '.pdf');
     }
 
-    public function reporteGeneralPDF()
-    {
-        $faunas = Fauna::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
-        $pdf = PDF::loadView('fauna.reportes.general', compact('faunas'))->setPaper('legal', 'landscape');
-        return $pdf->download('reporte_general_fauna.pdf');
-    }
 
-public function reportePdf(Request $request)
+
+public function reportePDF(Request $request)
 {
-    $query = Fauna::query();
+    $user = Auth::user();
+    $faunaIds = $this->obtenerFaunaAutorizada($user);
+    $faunas = Fauna::whereIn('id', $faunaIds)->get();
 
-    // Filtrar por institución del usuario autenticado
-    if (Auth::check()) {
-        $userInstitution = Auth::user()->institucion->nombre ?? null;
-        if ($userInstitution) {
-            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
-        }
+    if ($faunas->isEmpty()) {
+        return back()->with('error', 'No hay datos para generar el reporte.');
     }
 
-    // Aplicar filtros adicionales (fecha, código, etc.)
-    $query = $this->aplicarFiltros($request, $query);
-
-    $faunas = $query->get();
+    // Verifica que sí trae datos
+    // dd($faunas);
 
     $pdf = PDF::loadView('fauna.reportepdf', compact('faunas'))
               ->setPaper('legal', 'landscape');
@@ -247,31 +245,28 @@ public function reportePdf(Request $request)
 }
 
 
+
+
 public function reporteExcel(Request $request)
 {
-    $query = Fauna::query();
+    $user = Auth::user();
 
-    // Filtrar por institución del usuario autenticado
-    if (Auth::check()) {
-        $userInstitution = Auth::user()->institucion->nombre ?? null;
-        if ($userInstitution) {
-            $query->whereRaw('LOWER(institucion_remitente) = ?', [strtolower($userInstitution)]);
-        }
+    // Obtener fauna autorizada (IDs)
+    $faunaIds = $this->obtenerFaunaAutorizada($user);
+
+    $faunas = Fauna::whereIn('id', $faunaIds)->get();
+
+    if ($faunas->isEmpty()) {
+        return back()->with('error', 'No hay datos para exportar.');
     }
-
-    // Aplicar filtros adicionales (fecha, código, etc.)
-    $query = $this->aplicarFiltros($request, $query);
-
-    $faunas = $query->get();
 
     return Excel::download(new \App\Exports\FaunasExport($faunas), 'reporte_fauna_filtrado.xlsx');
 }
 
-
-
 public function destroy($id)
 {
     $fauna = Fauna::findOrFail($id);
+     $this->authorizeInstitution($fauna);
     $fauna->delete();
 
     return redirect()->route('fauna.index')->with('success', 'Registro eliminado correctamente.');
@@ -382,6 +377,156 @@ public function generarYGuardarPlantilla()
     return response()->json(['mensaje' => 'PDF generado correctamente.']);
 }
 
+ // MÉTODOS PRIVADOS
 
+private function handleImageUpload(Request $request): ?string
+    {
+        if ($request->hasFile('foto_animal')) {
+            $path = $request->file('foto_animal')->store('fotos_animales', 'public');
+            return 'storage/' . $path;
+        }
 
+        if ($request->filled('foto_base64') && preg_match('/^data:image\/(\w+);base64,/', $request->foto_base64, $matches)) {
+            $data = base64_decode(substr($request->foto_base64, strpos($request->foto_base64, ',') + 1));
+            $ext = strtolower($matches[1]);
+            if (!in_array($ext, ['jpeg', 'jpg', 'png'])) return null;
+
+            $filename = 'foto_' . time() . '.' . $ext;
+            $relativePath = 'fotos_animales/' . $filename;
+            Storage::disk('public')->put($relativePath, $data);
+            return 'storage/' . $relativePath;
+        }
+
+        return null;
+    }
+
+    private function handleFileUpload(Request $request, $input, $folder): ?string
+    {
+        if ($request->hasFile($input)) {
+            $file = $request->file($input);
+            $name = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs($folder, $name, 'public');
+            return 'storage/' . $path;
+        }
+        return null;
+    }
+
+    private function deleteFileIfExists(?string $path)
+    {
+        if ($path) {
+            $internalPath = str_replace('storage/', '', $path);
+            if (Storage::disk('public')->exists($internalPath)) {
+                Storage::disk('public')->delete($internalPath);
+            }
+        }
+    }
+
+    private function authorizeInstitution(Fauna $fauna)
+{
+    $user = Auth::user();
+    $fauna = $fauna->fauna;
+
+    if (!$fauna) {
+        abort(403, 'No se encontró el animal relacionado.');
+    }
+
+    // Última transferencia
+    $transferenciaActual = Transferencia::where('fauna_id', $fauna->id)
+        ->orderByDesc('fecha_transferencia')
+        ->first();
+
+    // Solo el creador (institución origen) puede modificar
+    if ($fauna->user->institucion_id == $user->institucion_id) {
+        return;
+    }
+
+    // Si no es el creador, pero recibió una transferencia, se restringe el acceso
+    if ($transferenciaActual && $transferenciaActual->institucion_destino == $user->institucion_id) {
+        abort(403, 'No tienes permiso para modificar o eliminar este historial. Solo puedes visualizarlo.');
+    }
+
+    // Si no cumple nada, también se bloquea
+    abort(403, 'No tienes permiso para modificar o eliminar este historial.');
 }
+
+
+    private function authorizeView(Fauna $fauna): void
+    {
+        $user = Auth::user();
+        $fauna = $fauna->fauna;
+
+        if (!$fauna) {
+            abort(403, 'No se encontró el animal relacionado.');
+        }
+
+        $institucionUser = $user->institucion_id;
+
+        $institucionOrigen = $fauna->user->institucion_id;
+
+        $institucionesDestino = Transferencia::where('fauna_id', $fauna->id)
+            ->pluck('institucion_destino')
+            ->toArray();
+
+        $institucionesOrigenTransferencia = Transferencia::where('fauna_id', $fauna->id)
+            ->pluck('institucion_origen')
+            ->toArray();
+
+        $institucionesAutorizadas = array_unique(array_merge(
+            [$institucionOrigen],
+            $institucionesDestino,
+            $institucionesOrigenTransferencia
+        ));
+
+        if (!in_array($institucionUser, $institucionesAutorizadas)) {
+            abort(403, 'No tienes permiso para visualizar o descargar este historial.');
+        }
+    }
+
+    private function obtenerFaunaAutorizada($user)
+{
+    $faunaIds = Fauna::query()
+        ->whereHas('user', function ($query) use ($user) {
+            $query->where('institucion_id', $user->institucion_id);
+        })
+        ->pluck('id')
+        ->toArray();
+
+    $faunaTransferida = Transferencia::where('institucion_destino', $user->institucion_id)
+        ->pluck('fauna_id')
+        ->toArray();
+
+    $faunaHistorial = Transferencia::whereIn('institucion_destino', [$user->institucion_id])
+        ->pluck('fauna_id')
+        ->toArray();
+
+    return collect(array_unique(array_merge($faunaIds, $faunaTransferida, $faunaHistorial)));
+}
+
+
+    private function authorizeInstitutionForFauna(Fauna $fauna)
+    {
+        $user = Auth::user();
+
+        if (!$fauna) {
+            abort(403, 'No se encontró el animal.');
+        }
+
+        if ($fauna->user && $fauna->user->institucion_id == $user->institucion_id) {
+            return;
+        }
+
+        $transferenciaActual = Transferencia::where('fauna_id', $fauna->id)
+            ->orderByDesc('fecha_transferencia')
+            ->first();
+
+        if ($transferenciaActual && $transferenciaActual->institucion_destino == $user->institucion_id) {
+            return;
+        }
+
+        abort(403, 'No tienes permiso para acceder a este animal.');
+    }
+}
+
+
+
+
