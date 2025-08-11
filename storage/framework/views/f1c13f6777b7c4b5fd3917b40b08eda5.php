@@ -132,14 +132,19 @@
                         <td class="px-3 py-2 border"><?php echo e($liberacion->observaciones); ?></td>
 
                         
-                        <td class="px-3 py-2 border text-center">
-                            <?php if($liberacion->foto): ?>
-                                <img src="<?php echo e(asset('storage/' . $liberacion->foto)); ?>" alt="Foto de liberación"
-                                     class="h-12 w-12 object-cover rounded">
-                            <?php else: ?>
-                                <span class="text-gray-400">Sin foto</span>
-                            <?php endif; ?>
-                        </td>
+<td class="px-3 py-2 border text-center">
+    <?php
+        $rutaFoto = storage_path('app/public/' . $liberacion->foto);
+    ?>
+
+    <?php if($liberacion->foto && file_exists($rutaFoto)): ?>
+        <img src="<?php echo e(asset('storage/' . $liberacion->foto)); ?>" alt="Foto de liberación"
+             class="h-12 w-12 object-cover rounded">
+    <?php else: ?>
+        <span class="text-gray-400">Sin foto</span>
+    <?php endif; ?>
+</td>
+
 
                         
 <td class="px-3 py-2 border text-center">
@@ -194,4 +199,16 @@
     </div>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startSection('scripts'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codigo = document.getElementById('codigo');
+    if (codigo) {
+        console.log('Valor del código:', codigo.value);
+    } else {
+        console.warn('Elemento #codigo no encontrado, evitando error');
+    }
+});
+</script>
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\registro_fauna\resources\views/liberaciones/index.blade.php ENDPATH**/ ?>
