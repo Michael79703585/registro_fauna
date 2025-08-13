@@ -53,6 +53,7 @@ class FaunaController extends Controller
     $gestiones = Fauna::select('gestion')->distinct()->pluck('gestion');
 
     
+    
     return view('fauna.index', compact('faunas', 'gestiones'));
 }
 
@@ -142,7 +143,10 @@ class FaunaController extends Controller
 
     public function edit($id)
     {
+        
         $fauna = Fauna::findOrFail($id);
+
+         $this->authorizeInstitution($fauna);
         return view('fauna.edit', compact('fauna'));
     }
 
@@ -421,33 +425,28 @@ private function handleImageUpload(Request $request): ?string
         }
     }
 
-    private function authorizeInstitution(Fauna $fauna)
+private function authorizeInstitution(Fauna $fauna)
 {
     $user = Auth::user();
-    $fauna = $fauna->fauna;
 
-    if (!$fauna) {
-        abort(403, 'No se encontró el animal relacionado.');
-    }
-
-    // Última transferencia
+    // Buscar la última transferencia de la fauna
     $transferenciaActual = Transferencia::where('fauna_id', $fauna->id)
         ->orderByDesc('fecha_transferencia')
         ->first();
 
-    // Solo el creador (institución origen) puede modificar
-    if ($fauna->user->institucion_id == $user->institucion_id) {
-        return;
+    if ($transferenciaActual) {
+        // Solo permite acción si el usuario pertenece a la institución destino de la última transferencia
+        if ($transferenciaActual->institucion_destino != $user->institucion_id) {
+            abort(403, 'No tienes permiso para modificar o eliminar esta fauna.');
+        }
+    } else {
+        // Si no hay transferencias, solo permite acción si pertenece a la institución del usuario que creó la fauna
+        if ($fauna->user->institucion_id != $user->institucion_id) {
+            abort(403, 'No tienes permiso para modificar o eliminar esta fauna.');
+        }
     }
-
-    // Si no es el creador, pero recibió una transferencia, se restringe el acceso
-    if ($transferenciaActual && $transferenciaActual->institucion_destino == $user->institucion_id) {
-        abort(403, 'No tienes permiso para modificar o eliminar este historial. Solo puedes visualizarlo.');
-    }
-
-    // Si no cumple nada, también se bloquea
-    abort(403, 'No tienes permiso para modificar o eliminar este historial.');
 }
+
 
 
     private function authorizeView(Fauna $fauna): void
